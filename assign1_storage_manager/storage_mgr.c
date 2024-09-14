@@ -28,6 +28,11 @@ int seekFilePointer(FILE *fileHandlerPointer, long int n, int position) {
 
 void fcloseFilePointer(FILE *fileHandlerPointer) { fclose(fileHandlerPointer); }
 
+RC printReturn(const char *methodName, RC returnValue)
+{
+  return returnValue;
+}
+
 FileDetails openFile(char *fileName, char *mode) {
   FileDetails fileError;
   fileError.returnCode = RC_OK;
@@ -126,26 +131,38 @@ int getBlockPos(SM_FileHandle *fHandle) {
 }
 
 RC readFirstBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
-  return readBlock(0, fHandle, memPage);
+  SM_FileHandle *record = fHandle;
+  SM_PageHandle row = memPage; 
+  int pageNum = 0;
+  return printReturn(__func__, readBlock(pageNum, record, row));
 }
 
 RC readLastBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
-  return readBlock(fHandle->totalNumPages - 1, fHandle, memPage);
+  SM_FileHandle *record = fHandle;
+  SM_PageHandle row = memPage;
+  int pageBlockEnd = record -> totalNumPages - 1; 
+  return printReturn(__func__, readBlock(pageBlockEnd, record, row));
 }
 
 RC readPreviousBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
+  SM_FileHandle *record = fHandle;
+  SM_PageHandle row = memPage;
   int readPreviousBlock = getBlockPos(fHandle) - 1;
-  return readBlock(readPreviousBlock, fHandle, memPage);
+  return readBlock(readPreviousBlock, record, row);
 }
 
 RC readCurrentBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
-  int readCurrentBlock = fHandle->curPagePos / PAGE_SIZE;
-  return readBlock(readCurrentBlock, fHandle, memPage);
+  SM_FileHandle *record = fHandle;
+  SM_PageHandle row = memPage;
+  int readCurrentBlock = record->curPagePos / PAGE_SIZE;
+  return readBlock(readCurrentBlock, record, row);
 }
 
 RC readNextBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
+  SM_FileHandle *record = fHandle;
+  SM_PageHandle row = memPage;
   int readNextBlock = getBlockPos(fHandle) + 1;
-  return readBlock(readNextBlock, fHandle, memPage);
+  return readBlock(readNextBlock, record, row);
 }
 
 /*
