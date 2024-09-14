@@ -50,6 +50,7 @@ RC createPageFile(char *fileName) {
     if (writeFileStatus == 0) {
       return RC_WRITE_FAILED;
     }
+    fcloseFilePointer(fileHandlerPointer);
     return RC_OK;
   }
 }
@@ -178,6 +179,7 @@ RC writeBlock(int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage) {
   }
   FileDetails fileDetails = openFile(fHandle->fileName, "r+");
   if (fileDetails.returnCode != RC_OK) {
+    fcloseFilePointer(fileHandlerPointer);
     return fileDetails.returnCode;
   }
   fileHandlerPointer = fileDetails.file;
@@ -190,6 +192,7 @@ RC writeBlock(int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage) {
     returnCode = RC_WRITE_FAILED;
     return returnCode;
   }
+  fcloseFilePointer(fileHandlerPointer);
   return returnCode;
 }
 
@@ -216,6 +219,7 @@ RC writeCurrentBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
   if (fileHandlerPointer == NULL) {
     FileDetails fileDetails = openFile(fHandle->fileName, "r+");
     if (fileDetails.returnCode != RC_OK) {
+      fcloseFilePointer(fileHandlerPointer);
       return fileDetails.returnCode;
     }
     fileHandlerPointer = fileDetails.file;
@@ -226,9 +230,11 @@ RC writeCurrentBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
   RC writeReturnCode = writeBlock(currentPageNumber + 1, fHandle, memPage);
   if (writeReturnCode != RC_OK) {
     returnCode = writeReturnCode;
+    fcloseFilePointer(fileHandlerPointer);
     return returnCode;
   }
   ++fHandle->totalNumPages;
+  fcloseFilePointer(fileHandlerPointer);
   return returnCode;
 }
 
@@ -253,6 +259,7 @@ RC appendEmptyBlock(SM_FileHandle *fHandle) {
   if (fileHandlerPointer == NULL) {
     FileDetails fileDetails = openFile(fHandle->fileName, "a+");
     if (fileDetails.returnCode != RC_OK) {
+      fcloseFilePointer(fileHandlerPointer);
       return fileDetails.returnCode;
     }
     fileHandlerPointer = fileDetails.file;
@@ -261,9 +268,11 @@ RC appendEmptyBlock(SM_FileHandle *fHandle) {
   RC writeReturnCode =
       writeBlock(fHandle->totalNumPages + 1, fHandle, pageInMemory);
   if (writeReturnCode != RC_OK) {
+    fcloseFilePointer(fileHandlerPointer);
     return writeReturnCode;
   }
   ++fHandle->totalNumPages;
+  fcloseFilePointer(fileHandlerPointer);
   return returnCode;
 }
 
@@ -290,12 +299,14 @@ RC ensureCapacity(int numberOfPages, SM_FileHandle *fHandle) {
   if (fileHandlerPointer == NULL) {
     FileDetails fileOrError = openFile(fHandle->fileName, "a+");
     if (fileOrError.returnCode != RC_OK) {
+      fcloseFilePointer(fileHandlerPointer);
       return fileOrError.returnCode;
     }
     fileHandlerPointer = fileOrError.file;
   }
   if (numberOfPages < fHandle->totalNumPages) {
     returnCode = RC_READ_NON_EXISTING_PAGE;
+    fcloseFilePointer(fileHandlerPointer);
     return returnCode;
   }
   int numberOfNewBlocksToAdd = numberOfPages - fHandle->totalNumPages;
@@ -304,6 +315,7 @@ RC ensureCapacity(int numberOfPages, SM_FileHandle *fHandle) {
     RC appendReturnCode = appendEmptyBlock(fHandle);
     if (appendReturnCode != RC_OK) {
       returnCode = RC_WRITE_FAILED;
+      fcloseFilePointer(fileHandlerPointer);
       return returnCode;
     }
     ++fHandle->totalNumPages;
@@ -311,7 +323,9 @@ RC ensureCapacity(int numberOfPages, SM_FileHandle *fHandle) {
   }
   if (i != numberOfNewBlocksToAdd) {
     returnCode = RC_WRITE_FAILED;
+    fcloseFilePointer(fileHandlerPointer);
     return returnCode;
   }
+  fcloseFilePointer(fileHandlerPointer);
   return returnCode;
 }
