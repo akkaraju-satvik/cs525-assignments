@@ -31,6 +31,11 @@ void fcloseFilePointer(FILE *fileHandlerPointer) {
   fileHandlerPointer = NULL;  
 }
 
+RC printReturn(const char *methodName, RC returnValue)
+{
+  return returnValue;
+}
+
 FileDetails openFile(char *fileName, char *mode) {
   FileDetails fileDetails;
   fileDetails.returnCode = RC_OK;
@@ -39,6 +44,21 @@ FileDetails openFile(char *fileName, char *mode) {
   if (file == NULL) fileDetails.returnCode = RC_FILE_NOT_FOUND;
   return fileDetails;
 }
+
+/*
+  @brief
+    Creates a new page file.
+  @details
+    This function creates a new file with a single empty page of size PAGE_SIZE (4096). 
+    If the file cannot be created, it returns an error code.
+  @category file operations
+
+  @param fileName - The name of the file to be created.
+
+  @return RC_OK if the file is created successfully.
+  @return RC_FILE_NOT_FOUND if the file could not be created.
+  @return RC_WRITE_FAILED if writing the empty page fails.
+*/
 
 RC createPageFile(char *fileName) {
   char *record = fileName;
@@ -58,6 +78,17 @@ RC createPageFile(char *fileName) {
   }
 }
 
+/*
+  @brief
+    Opens an existing file
+  @details
+    this function opens an existing file and sets the file handle
+  @category file operations
+  @param fileName - The name of the file to be created.
+  @return RC_FILE_NOT_FOUND if the file could not be created.
+  @return RC_OK if the file is created successfully.
+*/
+
 RC openPageFile(char *fileName, SM_FileHandle *fHandle) {
   char *record = fileName;
   fileHandlerPointer = fopen(record, "r");
@@ -72,6 +103,17 @@ RC openPageFile(char *fileName, SM_FileHandle *fHandle) {
   fcloseFilePointer(fileHandlerPointer);
   return RC_OK;
 }
+/*
+  @brief
+    close an existing file
+  @details
+    this function closes the file given in the fhandle. 
+    the pointer will be set to the starting position of the file before closing it.
+  @category file operations
+  @param fHandle - The file handle that stores the metadata of the file.
+  @return RC_FILE_NOT_FOUND if the file could not be created.
+  @return RC_OK if the file is created successfully.
+*/
 
 RC closePageFile(SM_FileHandle *fHandle) {
   FILE *fileHandlerPointer = fopen(fHandle->fileName, "rb+");
@@ -86,6 +128,16 @@ RC closePageFile(SM_FileHandle *fHandle) {
   return RC_FILE_NOT_FOUND;
 }
 
+/*
+  @brief
+    removes the created file
+  @details
+    Deletes the file from the system after closing it only if it exists.
+  @category file operations
+  @param fHandle - The file handle that stores the metadata of the file.
+  @return RC_FILE_NOT_FOUND if the file could not be created.
+  @return RC_OK if the file is created successfully.
+*/
 RC destroyPageFile(char *fileName) {
   FILE *fileHandlerPointer = fopen(fileName, "rb+");
   if (fileHandlerPointer != NULL) {
@@ -98,6 +150,22 @@ RC destroyPageFile(char *fileName) {
 
   return RC_FILE_NOT_FOUND;
 }
+
+/*
+  @brief
+    reads a block from the file at the specified page number in the file
+  @details
+    This function reads a block of data from a specific page number into the memory page handler.
+  @category read operations
+
+  @param pageNum - The page number to read from.
+  @param fHandle - The file handle that stores the metadata of the file.
+  @param memPage - The memory page to store the read data.
+
+  @return RC_FILE_NOT_FOUND if the file could not be created.
+  @return RC_OK if the file is created successfully.
+  @return RC_READ_NON_EXISTING_PAGE if the page number is invalid.
+*/
 
 RC readBlock(int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage) {
   FILE *fileHandlerPointer = fopen(fHandle->fileName, "r");
@@ -120,6 +188,17 @@ RC readBlock(int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage) {
   return RC_FILE_NOT_FOUND;
 }
 
+/*
+  @brief
+    Gets the current block position.
+  @details
+    Returns the current position of the file pointer based on the page number.
+  @category read operations
+
+  @param fHandle - The file handle that stores the metadata of the file.
+
+  @return int - The current page position.
+*/
 int getBlockPos(SM_FileHandle *fHandle) {
   FILE *fileHandlerPointer = fopen(fHandle->fileName, "r");
   if (fileHandlerPointer != NULL) {
@@ -129,27 +208,97 @@ int getBlockPos(SM_FileHandle *fHandle) {
   return 0;
 }
 
+/*
+  @brief
+    Reads the first block from the file.
+  @details
+    Reads the first page of the file into the memory page handler.
+  @category read page operations
+
+  @param fHandle - The file handle that stores the metadata of the file.
+  @param memPage - The memory page to store the read data.
+*/
+
 RC readFirstBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
-  return readBlock(0, fHandle, memPage);
+  SM_FileHandle *record = fHandle;
+  SM_PageHandle row = memPage; 
+  int pageNum = 0;
+  return printReturn(__func__, readBlock(pageNum, record, row));
 }
+
+
+/*
+  @brief
+    Reads the last block from the file.
+  @details
+    Reads the last page of the file into the memory page handler.
+  @category read page operations
+
+  @param fHandle - The file handle that stores the metadata of the file.
+  @param memPage - The memory page to store the read data.
+*/
+
 
 RC readLastBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
-  return readBlock(fHandle->totalNumPages - 1, fHandle, memPage);
+  SM_FileHandle *record = fHandle;
+  SM_PageHandle row = memPage;
+  int pageBlockEnd = record -> totalNumPages - 1; 
+  return printReturn(__func__, readBlock(pageBlockEnd, record, row));
 }
+
+/*
+  @brief
+    Reads the previous block based on the current position.
+  @details
+    Reads the page immediately before the current page into the memory page handler.
+  @category read page operations
+
+  @param fHandle - The file handle that stores the metadata of the file.
+  @param memPage - The memory page to store the read data.
+*/
 
 RC readPreviousBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
+  SM_FileHandle *record = fHandle;
+  SM_PageHandle row = memPage;
   int readPreviousBlock = getBlockPos(fHandle) - 1;
-  return readBlock(readPreviousBlock, fHandle, memPage);
+  return readBlock(readPreviousBlock, record, row);
 }
+
+/*
+  @brief
+    Reads the current block.
+  @details
+    This function reads the current page of the file into the memory page handler.
+  @category read page operations
+
+  @param fHandle - The file handle that stores the metadata of the file.
+  @param memPage - The memory page to store the read data.
+*/
 
 RC readCurrentBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
-  int readCurrentBlock = fHandle->curPagePos / PAGE_SIZE;
-  return readBlock(readCurrentBlock, fHandle, memPage);
+  SM_FileHandle *record = fHandle;
+  SM_PageHandle row = memPage;
+  int readCurrentBlock = record->curPagePos / PAGE_SIZE;
+  return readBlock(readCurrentBlock, record, row);
 }
 
+
+/*
+  @brief
+    Reads the next block relative to the current position.
+  @details
+    Reads the page immediately after the current page into the memory page handler.
+  @category read page operations
+
+  @param fHandle - The file handle that stores the metadata of the file.
+  @param memPage - The memory page to store the read data.
+*/
+
 RC readNextBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
+  SM_FileHandle *record = fHandle;
+  SM_PageHandle row = memPage;
   int readNextBlock = getBlockPos(fHandle) + 1;
-  return readBlock(readNextBlock, fHandle, memPage);
+  return readBlock(readNextBlock, record, row);
 }
 
 /*
