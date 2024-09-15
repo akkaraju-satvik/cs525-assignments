@@ -42,6 +42,7 @@ FileDetails openFile(char *fileName, char *mode) {
   return fileError;
 }
 
+
 RC createPageFile(char *fileName) {
   char *record = fileName;
   fileHandlerPointer = fopen(record, "w+");
