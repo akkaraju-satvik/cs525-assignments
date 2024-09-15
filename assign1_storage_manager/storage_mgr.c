@@ -371,7 +371,7 @@ RC writeBlock(int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage) {
     return returnCode;
   }
   if (pageNum > fHandle->totalNumPages) {
-    if (returnCode = ensureCapacity(pageNum, fHandle) && returnCode != RC_OK) {
+    if (returnCode = ensureCapacity(pageNum, fHandle), returnCode != RC_OK) {
       return returnCode;
     }
   }
