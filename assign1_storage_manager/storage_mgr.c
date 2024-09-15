@@ -195,7 +195,7 @@ RC readBlock(int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage) {
   SM_PageHandle row = memPage;
   // Opening file in "r" mode, it opens a file for only reading.
   FILE *fileHandlerPointer = fopen(recordHandle->fileName, "r");
-  if (pageNum < 0 || pageNum > reocrd->totalNumPages) {
+  if (pageNum < 0 || pageNum > recordHandle->totalNumPages) {
     return RC_READ_NON_EXISTING_PAGE; //no pages available
   }
   // Check file pointer value is not null.
