@@ -15,7 +15,8 @@ char *testName;
 
 /* prototypes for test functions */
 static void testCreateOpenClose(void);
-static void testSinglePageContent(void);
+//static void testSinglePageContent(void);
+static void testReadBlocks();
 
 /* main function running all tests */
 int main (void)
@@ -25,7 +26,8 @@ int main (void)
   initStorageManager();
 
   testCreateOpenClose();
-  testSinglePageContent();
+ // testSinglePageContent();
+  testReadBlocks();
 
   return 0;
 }
@@ -97,3 +99,55 @@ testSinglePageContent(void)
   
   TEST_DONE();
 }
+
+void
+testReadBlocks(){
+  SM_FileHandle fh;
+  SM_PageHandle ph;
+  int i;
+
+  testName = "testing all read block methods";
+
+  ph = (SM_PageHandle) malloc(PAGE_SIZE);
+
+  // create a new page file
+  TEST_CHECK(createPageFile (TESTPF));
+  TEST_CHECK(openPageFile (TESTPF, &fh));
+  printf("created and opened testfile\n");
+
+  // read first page into handle
+  TEST_CHECK(readFirstBlock (&fh, ph));
+  // the page should be empty (zero bytes)
+  for (i=0; i < PAGE_SIZE; i++)
+    ASSERT_TRUE((ph[i] == 0), "expected zero byte in first page of freshly initialized page");
+  printf("first block was empty\n");
+
+  // change ph to be a string and write that one to disk
+  for (i=0; i < PAGE_SIZE; i++) {
+    ph[i] = (i % 10) + '0';
+  }
+    
+  TEST_CHECK(writeBlock (0, &fh, ph));
+  printf("writing first block\n");
+
+  // read the current page containing the string and check that it is correct
+  TEST_CHECK(readCurrentBlock (&fh, ph));
+  for (i=0; i < PAGE_SIZE; i++) {
+       ASSERT_TRUE((ph[i] == (i % 10) + '0'), "character in page read from disk is the one we expected.");
+  }
+  printf("reading Current block\n");
+
+  // read the last page containing the string and check that it is correct
+  TEST_CHECK(readLastBlock (&fh, ph));
+  for (i=0; i < PAGE_SIZE; i++){
+       ASSERT_TRUE((ph[i] == (i % 10) + '0'), "character in page read from disk is the one we expected.");
+  }
+  printf("reading Last block\n");
+  printf("Destorying the file...\n");
+  // destroy new page file
+  TEST_CHECK(destroyPageFile (TESTPF));  
+  printf("Destoryed the file...\n");
+  
+  TEST_DONE();
+}
+
