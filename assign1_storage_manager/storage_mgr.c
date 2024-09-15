@@ -1,5 +1,5 @@
+//Importing all the header file required.
 #include "storage_mgr.h"
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,32 +10,40 @@ typedef struct {
   RC returnCode;
 } FileDetails;
 
+//Declaring the Pointer for file.
 FILE *fileHandlerPointer;
 FILE *nullValueCheck = NULL;
 
 // Method to make the pointer values as null.
-void makePointerNull() { fileHandlerPointer = nullValueCheck; }
+void makePointerNull() { 
+  fileHandlerPointer = nullValueCheck; 
+  }
 
+//Method for intializing the storage manager.
 void initStorageManager(void) {
   do {
-    makePointerNull();  // Initialize the file pointer to NULL value
+    makePointerNull();  // Initializing the file pointer to NULL value
   } while (0);
 }
 
+//Method to seek the file pointer.
 int seekFilePointer(FILE *fileHandlerPointer, long int n, int position) {
   return fseek(fileHandlerPointer, n, position);
 }
 
+//Method to close the file pointer.
 void fcloseFilePointer(FILE *fileHandlerPointer) {
   fclose(fileHandlerPointer);
   fileHandlerPointer = NULL;  
 }
-
+ 
+//Method to print the return information of the function 
 RC printReturn(const char *methodName, RC returnValue)
 {
   return returnValue;
 }
 
+// Method to open the file pointer
 FileDetails openFile(char *fileName, char *mode) {
   FileDetails fileDetails;
   fileDetails.returnCode = RC_OK;
@@ -60,20 +68,25 @@ FileDetails openFile(char *fileName, char *mode) {
   @return RC_WRITE_FAILED if writing the empty page fails.
 */
 
+//Method for creating a page file in memory
 RC createPageFile(char *fileName) {
-  char *record = fileName;
+  char *record = fileName;   //Declaring and Intializing variables
+  //Opening the given input file in "w+" mode, to create a new file name "filename" for read and write operation
   fileHandlerPointer = fopen(record, "w+");
+  //checks file pointer value if NULL
   if (fileHandlerPointer == nullValueCheck) {
     return RC_FILE_NOT_FOUND;
   } else {
     SM_PageHandle emptyPageHandler =
         (SM_PageHandle)calloc(PAGE_SIZE, sizeof(char));
+    // writing the date into the file handler
     int writeFileStatus =
         fwrite(emptyPageHandler, sizeof(char), PAGE_SIZE, fileHandlerPointer);
+    // checking if data written properly, if not return RC_WRITE_FAILED
     if (writeFileStatus == 0) {
       return RC_WRITE_FAILED;
     }
-    fcloseFilePointer(fileHandlerPointer);
+    fcloseFilePointer(fileHandlerPointer); //calling file closing method
     return RC_OK;
   }
 }
@@ -90,18 +103,20 @@ RC createPageFile(char *fileName) {
 */
 
 RC openPageFile(char *fileName, SM_FileHandle *fHandle) {
-  char *record = fileName;
-  fileHandlerPointer = fopen(record, "r");
-  if (fileHandlerPointer == NULL) {
+  char *recordID = fileName;
+  //Opening the file in 'r' mode, only for reading
+  fileHandlerPointer = fopen(recordID, "r");
+  if (fileHandlerPointer == nullValueCheck) {
     return RC_FILE_NOT_FOUND;
   }
-  fHandle->fileName = record;
+  // Assigning file Handle with filr name and with current page [osition]
+  fHandle->fileName = recordID;
   fHandle->curPagePos = 0;
   seekFilePointer(fileHandlerPointer, 0, SEEK_END);
   long fileSize = ftell(fileHandlerPointer);  // to get the file size
   fHandle->totalNumPages = fileSize / PAGE_SIZE;
-  fcloseFilePointer(fileHandlerPointer);
-  return RC_OK;
+  fcloseFilePointer(fileHandlerPointer); //calling file closing method
+  return RC_OK; //assigning return code with RC_OK
 }
 /*
   @brief
@@ -116,13 +131,16 @@ RC openPageFile(char *fileName, SM_FileHandle *fHandle) {
 */
 
 RC closePageFile(SM_FileHandle *fHandle) {
-  FILE *fileHandlerPointer = fopen(fHandle->fileName, "rb+");
-  if (fileHandlerPointer != NULL) {
+  //Declaring and Intializing Variables
+  SM_FileHandle *recordHandle = fHandle;
+  FILE *fileHandlerPointer = fopen(recordHandle->fileName, "rb+");
+  // checking if file pointer exists
+  if (fileHandlerPointer != NULL) { 
     int position = seekFilePointer(fileHandlerPointer, 0, SEEK_SET);
     if (position == 0) {
       fcloseFilePointer(fileHandlerPointer);
-      fileHandlerPointer = NULL;
-      return RC_OK;
+      fileHandlerPointer = NULL; //Assigning file pointer to NULL
+      return RC_OK; //Assigning return code to RC_OK.
     }
   }
   return RC_FILE_NOT_FOUND;
@@ -138,16 +156,20 @@ RC closePageFile(SM_FileHandle *fHandle) {
   @return RC_FILE_NOT_FOUND if the file could not be created.
   @return RC_OK if the file is created successfully.
 */
+
 RC destroyPageFile(char *fileName) {
-  FILE *fileHandlerPointer = fopen(fileName, "rb+");
-  if (fileHandlerPointer != NULL) {
+  //Declaring and Intializing Variables
+  char *recordID = fileName;
+  FILE *fileHandlerPointer = fopen(recordID, "rb+");
+  if (fileHandlerPointer != nullValueCheck) {
     fcloseFilePointer(fileHandlerPointer);
-    int mode = remove(fileName);
+    int mode = remove(recordID); 
+    //check if file removed properly
     if (mode == 0) {
-      return RC_OK;
+      return RC_OK; // Assigning return code to RC_ok
     }
   }
-
+  // Return code if file not destroyed
   return RC_FILE_NOT_FOUND;
 }
 
@@ -168,24 +190,31 @@ RC destroyPageFile(char *fileName) {
 */
 
 RC readBlock(int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage) {
-  FILE *fileHandlerPointer = fopen(fHandle->fileName, "r");
-  if (pageNum < 0 || pageNum > fHandle->totalNumPages) {
-    return RC_READ_NON_EXISTING_PAGE;
+  //Declaring and Intializing Variables
+  SM_FileHandle *recordHandle = fHandle;
+  SM_PageHandle row = memPage;
+  // Opening file in "r" mode, it opens a file for only reading.
+  FILE *fileHandlerPointer = fopen(recordHandle->fileName, "r");
+  if (pageNum < 0 || pageNum > reocrd->totalNumPages) {
+    return RC_READ_NON_EXISTING_PAGE; //no pages available
   }
-  if (fileHandlerPointer != NULL) {
+  // Check file pointer value is not null.
+  if (fileHandlerPointer != nullValueCheck) {
+    // Seeking the file pointer based page number and page size.
     int temp =
         seekFilePointer(fileHandlerPointer, (pageNum * PAGE_SIZE), SEEK_SET);
     if (temp == 0) {
-      fread(memPage, PAGE_SIZE, sizeof(char), fileHandlerPointer);
-      fHandle->curPagePos = ftell(fileHandlerPointer);
-      fcloseFilePointer(fileHandlerPointer);
-      return RC_OK;
+      // Reading memory pointed by Page handle pointer.
+      fread(row, PAGE_SIZE, sizeof(char), fileHandlerPointer);
+      recordHandle->curPagePos = ftell(fileHandlerPointer); // Assigning Page Number to current page position. 
+      fcloseFilePointer(fileHandlerPointer); //calling file closing method.
+      return RC_OK; //Return code 
     } else {
       return RC_READ_NON_EXISTING_PAGE;
     }
   }
   fcloseFilePointer(fileHandlerPointer);
-  return RC_FILE_NOT_FOUND;
+  return RC_FILE_NOT_FOUND; // Return code for file not found
 }
 
 /*
@@ -200,9 +229,11 @@ RC readBlock(int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage) {
   @return int - The current page position.
 */
 int getBlockPos(SM_FileHandle *fHandle) {
-  FILE *fileHandlerPointer = fopen(fHandle->fileName, "r");
+  //Declaring and Intializing Variables
+  SM_FileHandle *recordHandle = fHandle;
+  FILE *fileHandlerPointer = fopen(recordHandle->fileName, "r");
   if (fileHandlerPointer != NULL) {
-    int currentPage = fHandle->curPagePos;
+    int currentPage = recordHandle->curPagePos; //Assignning block posiiton with current page position.
     return currentPage;
   }
   return 0;
@@ -220,10 +251,12 @@ int getBlockPos(SM_FileHandle *fHandle) {
 */
 
 RC readFirstBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
-  SM_FileHandle *record = fHandle;
+  //Declaring and Intializing Variables
+  SM_FileHandle *recordHandle = fHandle;
   SM_PageHandle row = memPage; 
   int pageNum = 0;
-  return printReturn(__func__, readBlock(pageNum, record, row));
+  //Calling Read block method with Page number as o, file handle and the memPage
+  return printReturn(__func__, readBlock(pageNum, recordHandle, row));
 }
 
 
@@ -240,28 +273,13 @@ RC readFirstBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
 
 
 RC readLastBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
-  SM_FileHandle *record = fHandle;
+  //Declaring and Intializing Variables
+  SM_FileHandle *recordHandle = fHandle;
   SM_PageHandle row = memPage;
-  int pageBlockEnd = record -> totalNumPages - 1; 
-  return printReturn(__func__, readBlock(pageBlockEnd, record, row));
-}
-
-/*
-  @brief
-    Reads the previous block based on the current position.
-  @details
-    Reads the page immediately before the current page into the memory page handler.
-  @category read page operations
-
-  @param fHandle - The file handle that stores the metadata of the file.
-  @param memPage - The memory page to store the read data.
-*/
-
-RC readPreviousBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
-  SM_FileHandle *record = fHandle;
-  SM_PageHandle row = memPage;
-  int readPreviousBlock = getBlockPos(fHandle) - 1;
-  return readBlock(readPreviousBlock, record, row);
+  // Retriving last block number
+  int pageBlockEnd = recordHandle -> totalNumPages - 1; 
+  // Callong read block method with last page number
+  return printReturn(__func__, readBlock(pageBlockEnd, recordHandle, row));
 }
 
 /*
@@ -276,12 +294,34 @@ RC readPreviousBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
 */
 
 RC readCurrentBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
-  SM_FileHandle *record = fHandle;
+  //Declaring and Intializing Variables
+  SM_FileHandle *recordHandle = fHandle;
   SM_PageHandle row = memPage;
-  int readCurrentBlock = record->curPagePos / PAGE_SIZE;
-  return readBlock(readCurrentBlock, record, row);
+  // Assigning current page number to current page position and calculating current page number.
+  int readCurrentBlock = recordHandle->curPagePos / PAGE_SIZE;
+  return readBlock(readCurrentBlock, recordHandle, row);
 }
 
+/*
+  @brief
+    Reads the previous block based on the current position.
+  @details
+    Reads the page immediately before the current page into the memory page handler.
+  @category read page operations
+
+  @param fHandle - The file handle that stores the metadata of the file.
+  @param memPage - The memory page to store the read data.
+*/
+
+RC readPreviousBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
+  //Declaring and Intializing Variables
+  SM_FileHandle *recordHandle = fHandle;
+  SM_PageHandle row = memPage;
+  // Calculating Previous block number.
+  int readPreviousBlock = getBlockPos(fHandle) - 1;
+  // Calling Read block method with previous page number.
+  return readBlock(readPreviousBlock, recordHandle, row);
+}
 
 /*
   @brief
@@ -295,10 +335,13 @@ RC readCurrentBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
 */
 
 RC readNextBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
-  SM_FileHandle *record = fHandle;
+  //Declaring and Intializing Variables
+  SM_FileHandle *recordHandle = fHandle;
   SM_PageHandle row = memPage;
+  // Calculating Next page number.
   int readNextBlock = getBlockPos(fHandle) + 1;
-  return readBlock(readNextBlock, record, row);
+  //Calling the read block with next block number
+  return readBlock(readNextBlock, recordHandle, row);
 }
 
 /*
@@ -319,6 +362,7 @@ RC readNextBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
   @author Satvik Akkaraju
   @date 09/12/2024
 */
+
 RC writeBlock(int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage) {
   RC returnCode = RC_OK;
   // pageNum validations
@@ -368,6 +412,7 @@ RC writeBlock(int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage) {
   @author Satvik Akkaraju
   @date 09/12/2024
 */
+
 RC writeCurrentBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
   RC returnCode = RC_OK;
   if (fileHandlerPointer == NULL) {
@@ -409,6 +454,7 @@ RC writeCurrentBlock(SM_FileHandle *fHandle, SM_PageHandle memPage) {
   @author Satvik Akkaraju
   @date 09/11/2024
 */
+
 RC appendEmptyBlock(SM_FileHandle *fHandle) {
   RC returnCode = RC_OK;
   // only open the file if the fileHandlerPointer variable is NULL
@@ -452,6 +498,7 @@ RC appendEmptyBlock(SM_FileHandle *fHandle) {
   @author Satvik Akkaraju
   @date 09/11/2024
 */
+
 RC ensureCapacity(int numberOfPages, SM_FileHandle *fHandle) {
   RC returnCode = RC_OK;
   // only open the file if the fileHandlerPointer variable is NULL
