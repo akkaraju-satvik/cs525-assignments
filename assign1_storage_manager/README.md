@@ -137,9 +137,22 @@
 
 - #### `void makePointerNull()`
 
+  - Method to make the pointer values as null.
+  - Used in initStorageManager function to initialize the file.
+
 - #### `FileDetails openFile(char *fileName, char *mode)`
 
   - Initialize a FileDetails variable with returnCode to be RC_OK.
   - Open the file with required `mode`.
   - Set the fileDetails.file to the opened file pointer.
   - If the file is not opened as intended, set the returnCode of fileDetails to be an appropriate returnCode from `dberror.h`.
+
+- ### Test Cases
+
+- #### `void testReadBlocks()`
+  - Creates and Opens the test file.
+  - Reads the first block of the file and checks that it is empty (contains zero bytes).
+  - Writes content to the first block.
+  - Reads the current block and verifies the written content.
+  - Reads the last block and verifies that it matches the expected content.
+  - Destroys the file after passing all the test cases. 
