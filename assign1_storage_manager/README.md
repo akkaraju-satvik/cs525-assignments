@@ -31,27 +31,72 @@
 
 - #### `void initStorageManager (void)`
 
+  - This function initializes the storage manager.
+  - It assigns the global object created for the file stream to NULL using a function within this method.
+
 - #### `RC createPageFile (char *fileName)`
+
+  - This function used for creating a new page file and takes file name as in the argument passed to it.
+  - It open the file using the fopen function in write mode ('w+'). If file cannot be opened, the function returns the RC_FILE_NOT_FOUND.
+  - If the file is successfully opened, an empty page of size PAGE_SIZE is initialized using calloc.
+  - fwrite function is used to write empty page to new file created. If writing fails, then function returns RC_WRITE_FAILED.
+  - The file is closed using fcloserFilePointer function. If all operations are successful, the function return RC_OK.
 
 - #### `RC openPageFile (char *fileName, SM_FileHandle *fHandle)`
 
+  - This function is for opening an exisiting page file and initialize SM_FileHandle for file management.
+  - It takes the file name in the argument passed to it that needs to be opened. and fHandle pointer to initialize with files metadata.
+  - This function open the file in read mode ("r") and If the file is not found, then function returns RC_FILE_NOT_FOUND.
+  - Once the file is succesfully opened, fileName is assigned in fHandle and the curPagePos ( current page position) is set to 0.
+  - Seek the file pointer and close after reading the files information using fcloseFilePointer.
+  - Return RC as per the success/failure of the function as required.
+
 - #### `RC closePageFile (SM_FileHandle *fHandle)`
+
+  - This function is used to close an open page file in storage manager.
+  - Return RC_OK, if file is closed.
 
 - #### `RC destroyPageFile (char *fileName)`
 
+  - This function destroy the sile created.
+  - Open the file and check if not NULL
+  - Remove the file pointer, if file exists and return RC_OK.
+  - Return RC_FILE_NOT_FOUND, if file doesn't exist.
+
 - #### `RC readBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage)`
+
+  - This function reads a block from disk.
+  - File is opened only for reading using fopen in 'r'mode.
+  - Navigating file pointer using fseek() based on page number and page size.
+  - Read data and store at starting of the page handle.
+  - Verify the page number is not negative and larger than the total pages.
 
 - #### `int getBlockPos (SM_FileHandle *fHandle)`
 
-- #### `RC readFirstBlock (SM_FileHandle *fHandle, SM_PageHandle memPage)`
+  - This function returns the current page position in the file.
+
+- #### `RC readFirstBlock (SM_FileHandle *fHandle, SM_PageHandle memPage)
+
+  - This function`calls the readblock() with Page number as o to read first files first page.
 
 - #### `RC readPreviousBlock (SM_FileHandle *fHandle, SM_PageHandle memPage)`
 
+  - This function is to calculate the previous page number using the file current page position.
+  - Calling readblock(), where the current page -1 is assigned as previous page number to read the page.
+
 - #### `RC readCurrentBlock (SM_FileHandle *fHandle, SM_PageHandle memPage)`
+
+  - This function is to read the current page using file's current page position.
+  - Assigning current page number to current page position and calculating current page number.
+  - Calling readblock() methog with current page position by the page size.
 
 - #### `RC readNextBlock (SM_FileHandle *fHandle, SM_PageHandle memPage)`
 
+  - This function calls the readblock() with current page position+1 as the page number.
+
 - #### `RC readLastBlock (SM_FileHandle *fHandle, SM_PageHandle memPage)`
+
+  - This function calls the readblock() with total number of pages as the page number.
 
 - #### `RC writeBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage)`
 
@@ -89,8 +134,6 @@
   - Return RC as per the success/failure of the function as required.
 
 ### Utility functions
-
-- #### `void makePointerNull()`
 
 - #### `FileDetails openFile(char *fileName, char *mode)`
 
