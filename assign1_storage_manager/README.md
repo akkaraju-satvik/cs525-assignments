@@ -6,6 +6,15 @@
 > - Manaswini Nagasamudram - <mnagasamudram@hawk.iit.edu>
 > - Bindu Bhargavi Palam - <bpalam@hawk.iit.edu>
 
+## Contributions
+
+### Satvik Akkaraju
+
+- Authored the functions for *write operations* (writeBlock, writeCurrentBlock, appendEmptyBlock & ensureCapacity).
+- Implemented openFile utility function for the common task of opening the file in multiple functions.
+
+As implementation was in progress, it was noticed that some functions had similar functionality to other functions and as such the principle of DRY was applied and those functions referenced the other functions to utilize their functionalities. Handling various error codes was also done to make sure that any error from downstream functions were handled appropriately in the function where the calls were made. Adequate documentation was added to the authored functions explaining the operations done to achieve the requirements specified in the assignment instructions.
+
 ## Steps to execute the file
 
 - Clone the repository
@@ -150,9 +159,10 @@
 - ### Test Cases
 
 - #### `void testReadBlocks()`
+
   - Creates and Opens the test file.
   - Reads the first block of the file and checks that it is empty (contains zero bytes).
   - Writes content to the first block.
   - Reads the current block and verifies the written content.
   - Reads the last block and verifies that it matches the expected content.
-  - Destroys the file after passing all the test cases. 
+  - Destroys the file after passing all the test cases.
