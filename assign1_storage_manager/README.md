@@ -14,10 +14,7 @@
 - During the implementation, it was observed that some functions(readFirstBlock(), readLastBlock(), readCurrentBlock(), readPreviousBlock() and readNextBlock()) shared similar functionality. To avoid redundancy, allowing these functions to reference each other and consistent use of readBlock() and getBlockPos() functions.
 - Created a Makefile to automate the build process for compling and linking the code files.
 - Additionally, comprehensive documentation was added to the implemented functions, detailing the operations performed to meet the requirements outlined in the assignment instructions.
-- Implemented Error handling to manage cases such as reading non0esisting pages, missing files,file related issues and non-existing blocks were carefully managed to ensure that any issues from called functions were properly addressed. Clear documentation was provided for each function.
-
-
-## Contributions
+- Implemented Error handling to manage cases such as reading non-existing pages, missing files,file related issues and non-existing blocks were carefully managed to ensure that any issues from called functions were properly addressed. Clear documentation was provided for each function.
 
 ### Satvik Akkaraju
 
@@ -28,13 +25,15 @@ As implementation was in progress, it was noticed that some functions had simila
 
 ### Bindu Bhargavi Palam
 
-- Implemented the functions for file manipulations, and  helper methods which are used commonly in the methods
+- Implemented the functions for file manipulations (createPageFile, openPageFile, closePageFile, destroyPageFile), and  helper functions (fcloseFilePointer, seekFilePointer) which are used commonly in the methods
 
-  These methods provides a basic functions of creating, opening, closing and destroying the files. and also managaes the page files in the memory. All these functions returns the respective error codes if any exception/ error occurs while using these functions.
+  These methods provides a basic functions of creating, opening, closing and destroying the files. and also managaes the page files in the memory. All these functions returns the respective error codes if any exception/ error occurs while using these functions. 
 
-- Wrote some test cases for all the read blocks (readFirstBlock, readCurrentBlock and readLastBlock )and write block
+- Added some test cases for all the read blocks (readFirstBlock, readCurrentBlock and readLastBlock ) and write block
   
   The method testReadBlocks calls createPageFile, openPageFile, readFirstBlock, readCurrentBlock, readLastBlock writeBlock & destroyPageFile to trst and verifies all the basic functions in the file management. This test case ensures the functionality of all the reading block process from a page file and consistency throughout the function.Also included the assertions and checks to ensure and validate all the read blocks and write blocks returns the expected output
+
+- Added basic information & functionality about the brief and params above the respective functions.
 
 
 
