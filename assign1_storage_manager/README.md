@@ -129,6 +129,7 @@ As implementation was in progress, it was noticed that some functions had simila
   - Open the file if not open yet.
   - Allocate `PAGE_SIZE*sizeof(char)` memory using `calloc`
   - Write the memory page block to the file using `writeBlock` function.
+  - Free allocated memory.
   - Increment the number of pages by 1.
   - Return RC as per the success/failure of the function as required.
 

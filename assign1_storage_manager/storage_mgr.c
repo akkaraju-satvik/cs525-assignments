@@ -474,6 +474,8 @@ RC appendEmptyBlock(SM_FileHandle *fHandle) {
     fcloseFilePointer(fileHandlerPointer);
     return writeReturnCode;
   }
+  // free up pageInMemory to avoid mem-leaks
+  free(pageInMemory);
   // increment the number of pages on successful append
   ++fHandle->totalNumPages;
   fcloseFilePointer(fileHandlerPointer);
