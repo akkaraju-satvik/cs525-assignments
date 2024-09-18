@@ -15,6 +15,18 @@
 
 As implementation was in progress, it was noticed that some functions had similar functionality to other functions and as such the principle of DRY was applied and those functions referenced the other functions to utilize their functionalities. Handling various error codes was also done to make sure that any error from downstream functions were handled appropriately in the function where the calls were made. Adequate documentation was added to the authored functions explaining the operations done to achieve the requirements specified in the assignment instructions.
 
+### Bindu Bhargavi Palam
+
+- Implemented the functions for file manipulations, and  helper methods which are used commonly in the methods
+
+  These methods provides a basic functions of creating, opening, closing and destroying the files. and also managaes the page files in the memory. All these functions returns the respective error codes if any exception/ error occurs while using these functions.
+
+- Wrote some test cases for all the read blocks (readFirstBlock, readCurrentBlock and readLastBlock )and write block
+  
+  The method testReadBlocks calls createPageFile, openPageFile, readFirstBlock, readCurrentBlock, readLastBlock writeBlock & destroyPageFile to trst and verifies all the basic functions in the file management. This test case ensures the functionality of all the reading block process from a page file and consistency throughout the function.Also included the assertions and checks to ensure and validate all the read blocks and write blocks returns the expected output
+
+
+
 ## Steps to execute the file
 
 - Clone the repository
