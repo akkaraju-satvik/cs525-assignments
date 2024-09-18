@@ -8,6 +8,17 @@
 
 ## Contributions
 
+### Manaswini Nagasamudram
+
+- Implemented the functions for read operations, including readBlock, getBlockPos, readFirstBlock, readLastBlock, readCurrentBlock, readPreviousBlock and readNextBlock.
+- During the implementation, it was observed that some functions(readFirstBlock(), readLastBlock(), readCurrentBlock(), readPreviousBlock() and readNextBlock()) shared similar functionality. To avoid redundancy, allowing these functions to reference each other and consistent use of readBlock() and getBlockPos() functions.
+- Created a Makefile to automate the build process for compling and linking the code files.
+- Additionally, comprehensive documentation was added to the implemented functions, detailing the operations performed to meet the requirements outlined in the assignment instructions.
+- Implemented Error handling to manage cases such as reading non0esisting pages, missing files,file related issues and non-existing blocks were carefully managed to ensure that any issues from called functions were properly addressed. Clear documentation was provided for each function.
+
+
+## Contributions
+
 ### Satvik Akkaraju
 
 - Authored the functions for *write operations* (writeBlock, writeCurrentBlock, appendEmptyBlock & ensureCapacity).
@@ -86,7 +97,7 @@ As implementation was in progress, it was noticed that some functions had simila
 
 - #### `RC readBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage)`
 
-  - This function reads a block from disk.
+  - This function reads a block from disk into memory.
   - File is opened only for reading using fopen in 'r'mode.
   - Navigating file pointer using fseek() based on page number and page size.
   - Read data and store at starting of the page handle.
@@ -94,11 +105,13 @@ As implementation was in progress, it was noticed that some functions had simila
 
 - #### `int getBlockPos (SM_FileHandle *fHandle)`
 
-  - This function returns the current page position in the file.
+  - This function returns the current page position by aaccessing the currrent page number in the file Handle.
+  - Managed file opening and ensuring that if the file pointer is NULL, it returns 0 as a default value.
 
 - #### `RC readFirstBlock (SM_FileHandle *fHandle, SM_PageHandle memPage)
 
-  - This function`calls the readblock() with Page number as o to read first files first page.
+  - This function is to read the first block(page 0)from the file.
+  - Used readblock() with Page number as o to read first files first page.
 
 - #### `RC readPreviousBlock (SM_FileHandle *fHandle, SM_PageHandle memPage)`
 
@@ -113,11 +126,13 @@ As implementation was in progress, it was noticed that some functions had simila
 
 - #### `RC readNextBlock (SM_FileHandle *fHandle, SM_PageHandle memPage)`
 
-  - This function calls the readblock() with current page position+1 as the page number.
+  - This function is to read the next block after the current block by incrementing the current page position.
+  - Used getBlockPos() to retrieve the current position and called readblock() with current page position+1 as the page number to handle the read operation for the next block.
 
 - #### `RC readLastBlock (SM_FileHandle *fHandle, SM_PageHandle memPage)`
 
-  - This function calls the readblock() with total number of pages as the page number.
+  - This function is to read the last block in the file by using the total number of pages and subtracting 1 to get the last block index.
+  - Used readblock() with last block index as the page number to handle the read operation for the last block.
 
 - #### `RC writeBlock (int pageNum, SM_FileHandle *fHandle, SM_PageHandle memPage)`
 
