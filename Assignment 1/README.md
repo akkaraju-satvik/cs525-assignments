@@ -38,10 +38,10 @@ As implementation was in progress, it was noticed that some functions had simila
 ## Steps to execute the file
 
 - Clone the repository
-- Change to assign1_storage_manager directory
+- Change to "Assignment 1" directory
 
   ```bash
-  cd assign1_storage_manager
+  cd "Assignment 1"
   ```
 
 - Clean the repository of any previous executables and files created from the program using Makefile target `clean`.
