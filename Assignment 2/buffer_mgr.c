@@ -215,13 +215,68 @@ RC forceFlushPool(BM_BufferPool *const bm) {
 /* PAGE MANAGEMENT FUNCTIONS */
 
 RC markDirty(BM_BufferPool *const bm, BM_PageHandle *const page) {
+    // Check for a valid buffer pool
+    if (!bm || bm->numPages <= 0) {
+        return RC_INVALID_BM;  // Invalid buffer pool
+    }
+
+    // Access management information
+    BMInfo *info = (BMInfo *)bm->mgmtData;
+
+    // Locate the page to be marked as dirty
+    PageFrameNode *found = findNodeByPageNum(info->frames, page->pageNum);
+    if (found != NULL) {
+        // Mark the page as dirty
+        found->dirty = true;
+
+        return RC_OK;  // Successfully marked as dirty
+    }
+
+    return RC_NON_EXISTING_PAGE_IN_FRAME;  // Page not found in buffer
 }
+
 
 RC unpinPage(BM_BufferPool *const bm, BM_PageHandle *const page) {
 }
 
 RC forcePage(BM_BufferPool *const bm, BM_PageHandle *const page) {
+    // Check if the buffer pool is valid and contains pages
+    if (!bm || bm->numPages <= 0) {
+        return RC_INVALID_BM;  // Return error for invalid buffer pool
+    }
+
+    // Retrieve buffer management information
+    BMInfo *info = (BMInfo *)bm->mgmtData;
+    PageFrameNode *found;  // Pointer to locate the page frame
+    SM_FileHandle fh;      // File handle for the page file
+
+    // Attempt to open the page file; if it fails, return an error
+    if (openPageFile((char *)(bm->pageFile), &fh) != RC_OK) {
+        return RC_FILE_NOT_FOUND;  // Error: page file not found
+    }
+
+    // Locate the page frame by page number
+    found = findNodeByPageNum(info->frames, page->pageNum);
+    if (found == NULL) {
+        closePageFile(&fh);  // Close the page file before returning
+        return RC_NON_EXISTING_PAGE_IN_FRAME;  // Error: page not in frame
+    }
+
+    // Write the current page data back to the page file on disk
+    if (writeBlock(found->pageNum, &fh, found->dataPoint) != RC_OK) {
+        closePageFile(&fh);      // Close the page file before returning
+        return RC_WRITE_FAILED;  // Error: writing to the file failed
+    }
+
+    // Increment the write count in the buffer management info
+    info->numWrite++;
+
+    // Close the page file after operations are complete
+    closePageFile(&fh);
+
+    return RC_OK;  // Successful operation
 }
+
 
 RC pinPage(BM_BufferPool *const bm, BM_PageHandle *const page,
            const PageNumber pageNum) {
@@ -230,12 +285,59 @@ RC pinPage(BM_BufferPool *const bm, BM_PageHandle *const page,
 /* STATISTICS FUNCTIONS */
 
 PageNumber *getFrameContents(BM_BufferPool *const bm) {
+    // Check if the buffer pool is valid
+    if (bm == NULL || bm->mgmtData == NULL) {
+        return NULL;  // Return NULL if the buffer pool or management data is
+                      // invalid
+    }
+
+    // Cast the management data to BMInfo and retrieve the frame-to-page mapping
+    BMInfo *info = (BMInfo *)bm->mgmtData;
+    return info
+        ->frameToPage;  // Return the pointer to the frame-to-page mapping
 }
 
 bool *getDirtyFlags(BM_BufferPool *const bm) {
+    // Check if the buffer pool is valid
+    if (bm == NULL || bm->mgmtData == NULL) {
+        return NULL;  // Return NULL if the buffer pool or management data is
+                      // invalid
+    }
+
+    // Cast the management data to BMInfo for easier access
+    BMInfo *info = (BMInfo *)bm->mgmtData;
+
+    // Iterate through frames list from the head of the list
+    for (PageFrameNode *cur = info->frames->head; cur != NULL;
+         cur = cur->nextFrame) {
+        info->dirtyFlags[cur->frameNum] =
+            cur->dirty;  // Set the dirty flag for the current frame
+    }
+
+    // Return the updated dirtyFlags array
+    return info->dirtyFlags;
 }
 
 int *getFixCounts(BM_BufferPool *const bm) {
+    // Check if the buffer pool is valid
+    if (bm == NULL || bm->mgmtData == NULL) {
+        return NULL;  // Return NULL if the buffer pool or management data is
+                      // invalid
+    }
+
+    // Cast the management data to BMInfo for easier access
+    BMInfo *info = (BMInfo *)bm->mgmtData;
+    PageFrameNode *cur =
+        info->frames->head;  // Start at the head of the frame list
+
+    // Use a for loop to iterate through the list of frames
+    for (; cur != NULL; cur = cur->nextFrame) {
+        info->fixedCounts[cur->frameNum] =
+            cur->fixCount;  // Update the fix count for the current frame
+    }
+
+    // Return the updated fixedCounts array
+    return info->fixedCounts;
 }
 
 int getNumReadIO(BM_BufferPool *const bm) {
