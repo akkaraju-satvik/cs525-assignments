@@ -552,7 +552,6 @@ RC pinPage_CLOCK(BM_BufferPool *const bm, BM_PageHandle *const page,
 }
 
 
-
 /*Buffer Pool Functions*/
 
 RC initBufferPool(BM_BufferPool *const bm, const char *const pageFileName,

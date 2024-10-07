@@ -9,18 +9,27 @@
 ## Contributions
 
 ### Manaswini Nagasamudram
+
 - Designed the page management functions that contain the pinPage and unpinPage with following strategies: FIFO, LRU, CLOCK, LFU, and LRU-K.
 - Implemented utility functions updateHead(), to make the given node the head of the list; findNodeByPageNum(), to find the node with the given page number - first check by the lookup array, and if available in memory, then to find the exact node; findNodeByPageNum(). UpdateNewFrame().
 - Implemented page replacement strategies of FIFO, LRU, LFU, CLOCK, and LRU-K with pinPage functions in a buffer management system. Each of these functions takes up memory management, page loading, and page replacement according to the respective strategy to perform optimally within the usage of resources of the buffer pool. It deals with managing lists of frames, updating metadata of pages, and ensuring the correct application of replacement algorithms.
 
 ### Satvik Akkaraju
 
+- Authored the **pool handling** functions for the Buffer Manager Interface (`initBufferPool`, `shutdownBufferPool` & `forceFlushPool`) and 2 of 5 statistics related functions (`getNumReadIO` and `getNumWriteIO`).
+
+- Implementation of `newNode` utility function to create a new frame in the frame list.
+
+- Code was thoroughly reviewed to prevent any memory leaks.
+
 ### Bindu Bhargavi Palam
-- Implemented "makeDirty". In this function it marks a specific page as "dirty" in the buffer pool in the disk, showcasing that the page has been modified. and it also ensures whether it is being written in the disk or not. it make sures that the buffer pool is valid and checks the page is present before marking it dirty. 
+
+- Implemented "makeDirty". In this function it marks a specific page as "dirty" in the buffer pool in the disk, showcasing that the page has been modified. and it also ensures whether it is being written in the disk or not. it makes sure that the buffer pool is valid and checks the page is present before marking it dirty.
 - Implemented "getFrameContents" method returning current page mapping stored in the buffer pool and returning an array of page numbers corresponding to every frame.
 - Implemented "getDirtyFlags", which updates and returns the dirty flags in the buffer pool of all the frames in the disk, ensuring that each frame has been modified.
 - Implemented "getFixCounts" method to update and then return the fix counts in the buffer pool of every frame. It now returns how many users are currently using each frame.
 - contributed to making the Makefile for this assignment.
+
 ## Steps to execute the file
 
 - Clone the repository
