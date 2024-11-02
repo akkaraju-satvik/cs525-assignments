@@ -68,7 +68,7 @@ void intToStr(int j, int val, char *intStr) {
 //gets the byte offset of an attribute in the schema based on its position
 int attributePositionInSchema(Schema *schema, int positionOfAttribute) {
     int offset = 1;
-    while (positionOfAttribute > 0) {
+    while (positionOfAttribute >= 0) {
         switch (schema->dataTypes[positionOfAttribute]) {
             case DT_INT:
                 offset += sizeof(int);
