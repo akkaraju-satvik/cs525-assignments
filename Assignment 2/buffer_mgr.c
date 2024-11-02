@@ -707,7 +707,6 @@ RC markDirty(BM_BufferPool *const bm, BM_PageHandle *const page) {
     return RC_NON_EXISTING_PAGE_IN_FRAME;  // Page not found in buffer
 }
 
-
 RC unpinPage(BM_BufferPool *const bm, BM_PageHandle *const page) {
 // Check for a valid buffer pool
     if (!bm || bm->numPages <= 0) {
@@ -771,7 +770,6 @@ RC forcePage(BM_BufferPool *const bm, BM_PageHandle *const page) {
 
     return RC_OK;  // Successful operation
 }
-
 
 RC pinPage(BM_BufferPool *const bm, BM_PageHandle *const page,
            const PageNumber pageNum) {
