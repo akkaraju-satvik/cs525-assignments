@@ -140,7 +140,7 @@ extern RC closeTable(RM_TableData *rel) {
 // SCANS
 
 extern RC next(RM_ScanHandle *scan, Record *record) {
-    int blockfactor = PAGE_SIZE / recordManager->sizeOfRecord;
+    int pageCapacity = PAGE_SIZE / recordManager->sizeOfRecord;
     int totalTuple = recordManager->numberOfRecords;
     BM_PageHandle *page = recordManager->pageHandle;
     BM_BufferPool *bm = recordManager->bufferPool;
@@ -165,7 +165,7 @@ extern RC next(RM_ScanHandle *scan, Record *record) {
             if (queryExpResult->v.boolV == 1) {
                 record->id.page = curPageScan;
                 record->id.slot = curSlotScan;
-                if (curSlotScan == (blockfactor - 1)) {
+                if (curSlotScan == (pageCapacity - 1)) {
                     curPageScan = curPageScan + 1;
                     curSlotScan = 0;
                 } else {
@@ -178,7 +178,7 @@ extern RC next(RM_ScanHandle *scan, Record *record) {
         } else {
             queryExpResult->v.boolV == TRUE;
         }
-        if (curSlotScan == (blockfactor - 1)) {
+        if (curSlotScan == (pageCapacity - 1)) {
             curPageScan = curPageScan + 1;
             curSlotScan = 0;
         } else {
