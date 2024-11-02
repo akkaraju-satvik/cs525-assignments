@@ -20,16 +20,6 @@ typedef struct NodeData {
     char *dataPoint;
 } NodeData;
 
-typedef struct NodeData {
-    int pageNum;
-    int frameNum;
-    int dirty;
-    int fixCount;
-    int referenceBit;
-    int pageFrequency;
-    char *dataPoint;
-} NodeData;
-
 typedef struct PageFrameNode {
     NodeData data;
     struct PageFrameNode *nextFrame;
