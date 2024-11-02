@@ -20,7 +20,16 @@ typedef struct NodeData {
     char *dataPoint;
 } NodeData;
 
-// A frame node consisting one page/frame of a buffer pool
+typedef struct NodeData {
+    int pageNum;
+    int frameNum;
+    int dirty;
+    int fixCount;
+    int referenceBit;
+    int pageFrequency;
+    char *dataPoint;
+} NodeData;
+
 typedef struct PageFrameNode {
     NodeData data;
     struct PageFrameNode *nextFrame;
@@ -28,7 +37,6 @@ typedef struct PageFrameNode {
 
 } PageFrameNode;
 
-// A frame list with a pointer to head and tail node of type PageFrameNode
 typedef struct FrameList {
     PageFrameNode *head;
     PageFrameNode *tail;
@@ -106,7 +114,6 @@ lookup array, and if available in memory, then to find the exact node.
 */
 
 PageFrameNode *findNodeByPageNum(FrameList *list, const PageNumber pageNum) {
-    // Use a for loop to traverse the list starting from the head.
     for (PageFrameNode *current = list->head; current != NULL;
          current = current->nextFrame) {
         // If the current node's page number matches, return it.
@@ -611,7 +618,6 @@ RC pinPage(BM_BufferPool *const bm, BM_PageHandle *const page,
 /* STATISTICS FUNCTIONS */
 
 PageNumber *getFrameContents(BM_BufferPool *const bm) {
-    // Check if the buffer pool is valid
     if (bm == NULL || bm->mgmtData == NULL) {
         return NULL;
     }
@@ -621,7 +627,6 @@ PageNumber *getFrameContents(BM_BufferPool *const bm) {
 }
 
 bool *getDirtyFlags(BM_BufferPool *const bm) {
-    // Check if the buffer pool is valid
     if (bm == NULL || bm->mgmtData == NULL) {
         return NULL;// Return NULL if the buffer pool or management data is
                       // invalid
@@ -638,7 +643,6 @@ bool *getDirtyFlags(BM_BufferPool *const bm) {
 }
 
 int *getFixCounts(BM_BufferPool *const bm) {
-    // Check if the buffer pool is valid
     if (bm == NULL || bm->mgmtData == NULL) {
         return NULL;
     }
@@ -654,7 +658,6 @@ int *getFixCounts(BM_BufferPool *const bm) {
 }
 
 int getNumReadIO(BM_BufferPool *const bm) {
-    // Check if the buffer pool is valid
     if (bm == NULL || bm->mgmtData == NULL) {
         return -1;
     }
