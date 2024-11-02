@@ -317,8 +317,7 @@ RC pinPage_LRU(BM_BufferPool *const bm, BM_PageHandle *const page,
     return RC_OK;  // Return success
 }
 
-RC pinPage_LRU_K(BM_BufferPool *const bm, BM_PageHandle *const page,
-                 const PageNumber pageNum) {
+RC pinPage_LRU_K(BM_BufferPool *const bm, BM_PageHandle *const page, const PageNumber pageNum) {
     PageFrameNode *found;
     BMInfo *info = (BMInfo *)bm->mgmtData;
     int K = (long)(info->stratData);
@@ -327,17 +326,15 @@ RC pinPage_LRU_K(BM_BufferPool *const bm, BM_PageHandle *const page,
 
     // Check if page already in memory. The pageToFrame array provides the fast lookup.
     if ((found = pageInMemory(bm, page, pageNum)) != NULL) {
-    
-    int i = K - 1;
-    while (i > 0) {
-   info->khist[found->pageNum][i] =
-                info->khist[found->pageNum][i - 1];
-    --i;
-}
-    info->khist[found->pageNum][0] = info->countPinning;
-
+        int i = K - 1;
+        while (i > 0) {
+            info->khist[found->pageNum][i] = info->khist[found->pageNum][i - 1];
+            --i;
+        }
+        info->khist[found->pageNum][0] = info->countPinning;
         return RC_OK;
     }
+
     /* If need to load the page*/
 
     /* If the frames in the memory are less than the total available frames,
@@ -345,12 +342,11 @@ RC pinPage_LRU_K(BM_BufferPool *const bm, BM_PageHandle *const page,
     if ((info->numFrames) < bm->numPages) {
         found = info->frames->head;
 
-      for (int i = 0; i < info->numFrames; ++i) {
-        found = found->nextFrame;
-}
+        for (int i = 0; i < info->numFrames; ++i) {
+            found = found->nextFrame;
+        }
 
-
-        /*This frame will be filled up now, so increase the frame count*/
+       //This frame will be filled up now, so increase the frame count/
         (info->numFrames)++;
     } else {
         /* For new page, if all the frames are filled, then try to find a frame
@@ -360,37 +356,36 @@ RC pinPage_LRU_K(BM_BufferPool *const bm, BM_PageHandle *const page,
 
         current = info->frames->head;
 
-     for (; current != NULL; current = current->nextFrame) {
-    if (current->fixCount == 0 && info->khist[current->pageNum][K] != -1) {
-        dist = info->countPinning - info->khist[current->pageNum][K];
+        for (; current != NULL; current = current->nextFrame) {
+            if (current->fixCount == 0 && info->khist[current->pageNum][K] != -1) {
+                dist = info->countPinning - info->khist[current->pageNum][K];
 
-        if (dist > max_dist) {
-            max_dist = dist;
-            found = current;
+                if (dist > max_dist) {
+                    max_dist = dist;
+                    found = current;
+                }
+            }
         }
-    }
-}
-
 
         /* If reached to head, it means no frames with fixed count 0
          * available.*/
         if (max_dist == -1) {
-    current = info->frames->head;
+            current = info->frames->head;
 
-    for (; current != NULL && current->fixCount != 0; current = current->nextFrame) {
-        dist = info->countPinning - info->khist[current->pageNum][0];
+            for (; current != NULL && current->fixCount != 0; current = current->nextFrame) {
+                dist = info->countPinning - info->khist[current->pageNum][0];
 
-        if (dist > max_dist) {
-            max_dist = dist;
-            found = current;
+                if (dist > max_dist) {
+                    max_dist = dist;
+                    found = current;
+                }
+            }
+
+            if (max_dist == -1) {
+                return RC_NO_MORE_SPACE_IN_BUFFER;
+            }
         }
     }
-
-    if (max_dist == -1) {
-        return RC_NO_MORE_SPACE_IN_BUFFER;
-    }
-}
-
 
     RC s;
     s = updateNewFrame(bm, found, page, pageNum);
@@ -405,7 +400,6 @@ RC pinPage_LRU_K(BM_BufferPool *const bm, BM_PageHandle *const page,
 
     return RC_OK;
 }
-
 RC pinPage_LFU(BM_BufferPool *const bm, BM_PageHandle *const page,
                const PageNumber pageNum) 
 {
