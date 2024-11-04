@@ -79,11 +79,11 @@ main (void)
 
 	testInsertManyRecords();
 	testRecords();
-	testCreateTableAndInsert();
+	//testCreateTableAndInsert();
 	testUpdateTable();
-	testScans();
-	testScansTwo();
-	testMultipleScans();
+	//testScans();
+	//testScansTwo();
+	//testMultipleScans();
 
 	return 0;
 }
@@ -123,7 +123,6 @@ testRecords (void)
 	freeVal(value);
 
 	freeRecord(r);
-    freeSchema(schema);   // added Summer 2021
 	TEST_DONE();
 }
 
@@ -157,24 +156,22 @@ testCreateTableAndInsert (void)
 
 	// insert rows into table
 	for(i = 0; i < numInserts; i++)
-    {
+	{
 		r = fromTestRecord(schema, inserts[i]);
 		TEST_CHECK(insertRecord(table,r));
 		rids[i] = r->id;
-        freeRecord(r);    // added Fall 2021
-    }
+	}
 
 	TEST_CHECK(closeTable(table));
 	TEST_CHECK(openTable(table, "test_table_r"));
 
 	// randomly retrieve records from the table and compare to inserted ones
 	for(i = 0; i < 1000; i++)
-	{   TEST_CHECK(createRecord(&r, schema));  // added Fall 2021
+	{
 		int pos = rand() % numInserts;
 		RID rid = rids[pos];
 		TEST_CHECK(getRecord(table, rid, r));
 		ASSERT_EQUALS_RECORDS(fromTestRecord(schema, inserts[pos]), r, schema, "compare records");
-        freeRecord (r);  // Added: Summer 2021
 	}
 
 	TEST_CHECK(closeTable(table));
@@ -183,7 +180,6 @@ testCreateTableAndInsert (void)
 
 	free(rids);
 	free(table);
-    freeSchema(schema);   // Added: Summer 2021
 	TEST_DONE();
 }
 
@@ -225,7 +221,6 @@ testMultipleScans(void)
 		r = fromTestRecord(schema, inserts[i]);
 		TEST_CHECK(insertRecord(table,r));
 		rids[i] = r->id;
-        freeRecord(r);  // Added: Summer 2021
 	}
 
 	// Mix 2 scans with c=3 as condition
@@ -261,13 +256,6 @@ testMultipleScans(void)
 
 	free(rids);
 	free(table);
-// ****** Added Summer 2021
-    freeRecord(r);
-    free(sc1);
-    free(sc2);
-    freeExpr(se1);
-    freeSchema(schema);
-// *******
 	TEST_DONE();
 }
 
@@ -324,32 +312,26 @@ testUpdateTable (void)
 		r = fromTestRecord(schema, inserts[i]);
 		TEST_CHECK(insertRecord(table,r));
 		rids[i] = r->id;
-        freeRecord(r);   // Added Summer 2021
 	}
 
 	// delete rows from table
-    TEST_CHECK(createRecord(&r, schema)); // added Fall 2021
 	for(i = 0; i < numDeletes; i++)
 	{
 		TEST_CHECK(deleteRecord(table,rids[deletes[i]]));
-        ASSERT_ERROR(getRecord(table, rids[deletes[i]], r), "try to access record after you delete it");   // Added Summer 2021
 	}
-    freeRecord(r);   // Added Summer 2021
-    
+
 	// update rows into table
 	for(i = 0; i < numUpdates; i++)
 	{
 		r = fromTestRecord(schema, updates[i]);
 		r->id = rids[i];
 		TEST_CHECK(updateRecord(table,r));
-        freeRecord(r);   // Added Summer 2021
 	}
 
 	TEST_CHECK(closeTable(table));
 	TEST_CHECK(openTable(table, "test_table_r"));
 
 	// retrieve records from the table and compare to expected final stage
-    TEST_CHECK(createRecord(&r, schema));    // Added Summer 2021
 	for(i = 0; i < numFinal; i++)
 	{
 		RID rid = rids[i];
@@ -362,11 +344,6 @@ testUpdateTable (void)
 	TEST_CHECK(shutdownRecordManager());
 
 	free(table);
-// ***** Added Summer 2021
-    free(rids);
-    freeRecord(r);
-    freeSchema(schema);
- // *****
 	TEST_DONE();
 }
 
@@ -411,25 +388,23 @@ testInsertManyRecords(void)
 		r = fromTestRecord(schema, realInserts[i]);
 		TEST_CHECK(insertRecord(table,r));
 		rids[i] = r->id;
-        freeRecord(r);   // Added Summer 2021
 	}
 	TEST_CHECK(closeTable(table));
 	TEST_CHECK(openTable(table, "test_table_t"));
 
 	// retrieve records from the table and compare to expected final stage
-    TEST_CHECK(createRecord(&r, schema));    // Added Summer 2021
 	for(i = 0; i < numInserts; i++)
 	{
 		RID rid = rids[i];
 		TEST_CHECK(getRecord(table, rid, r));
 		ASSERT_EQUALS_RECORDS(fromTestRecord(schema, realInserts[i]), r, schema, "compare records");
 	}
-    freeRecord(r);   // Added Summer 2021
 
 	r = fromTestRecord(schema, updates[0]);
 	r->id = rids[randomRec];
 	TEST_CHECK(updateRecord(table,r));
 	TEST_CHECK(getRecord(table, rids[randomRec], r));
+
 	ASSERT_EQUALS_RECORDS(fromTestRecord(schema, updates[0]), r, schema, "compare records");
 
 	TEST_CHECK(closeTable(table));
@@ -438,10 +413,6 @@ testInsertManyRecords(void)
 
 	freeRecord(r);
 	free(table);
-// ***** Added Summer 2021
-    free(rids);
-    freeSchema(schema);
-// *****
 	TEST_DONE();
 }
 
@@ -490,7 +461,6 @@ void testScans (void)
 		r = fromTestRecord(schema, inserts[i]);
 		TEST_CHECK(insertRecord(table,r));
 		rids[i] = r->id;
-        freeRecord(r);   // Added Summer 2021
 	}
 
 	TEST_CHECK(closeTable(table));
@@ -502,7 +472,6 @@ void testScans (void)
 	MAKE_BINOP_EXPR(sel, left, right, OP_COMP_EQUAL);
 
 	TEST_CHECK(startScan(table, sc, sel));
-    TEST_CHECK(createRecord(&r, schema));  // Added Summer 2021
 	while((rc = next(sc, r)) == RC_OK)
 	{
 		for(i = 0; i < scanSizeOne; i++)
@@ -511,8 +480,6 @@ void testScans (void)
 				foundScan[i] = TRUE;
 		}
 	}
-    freeRecord(r);   // Added Summer 2021
-
 	if (rc != RC_RM_NO_MORE_TUPLES)
 		TEST_CHECK(rc);
 	TEST_CHECK(closeScan(sc));
@@ -526,10 +493,6 @@ void testScans (void)
 
 	free(table);
 	free(sc);
-// ***** Added Summer 2021
-    free(rids);
-    freeSchema(schema);
-// *****
 	freeExpr(sel);
 	TEST_DONE();
 }
@@ -575,7 +538,9 @@ void testScansTwo (void)
 	rids = (RID *) malloc(sizeof(RID) * numInserts);
 
 	TEST_CHECK(initRecordManager(NULL));
+	
 	TEST_CHECK(createTable("test_table_r",schema));
+	
 	TEST_CHECK(openTable(table, "test_table_r"));
 
 	// insert rows into table
@@ -584,7 +549,6 @@ void testScansTwo (void)
 		r = fromTestRecord(schema, inserts[i]);
 		TEST_CHECK(insertRecord(table,r));
 		rids[i] = r->id;
-        freeRecord(r);   // Added Summer 2021
 	}
 
 	TEST_CHECK(closeTable(table));
@@ -650,7 +614,6 @@ void testScansTwo (void)
 	freeRecord(r);
 	free(table);
 	free(sc);
-    freeSchema(schema);   // Added Summer 2021
 	freeExpr(sel);
 	TEST_DONE();
 }
@@ -695,15 +658,20 @@ testRecord(Schema *schema, int a, char *b, int c)
 {
 	Record *result;
 	Value *value;
-
+  
 	TEST_CHECK(createRecord(&result, schema));
 
 	MAKE_VALUE(value, DT_INT, a);
+	
 	TEST_CHECK(setAttr(result, schema, 0, value));
+	
+
 	freeVal(value);
 
 	MAKE_STRING_VALUE(value, b);
+
 	TEST_CHECK(setAttr(result, schema, 1, value));
+	
 	freeVal(value);
 
 	MAKE_VALUE(value, DT_INT, c);

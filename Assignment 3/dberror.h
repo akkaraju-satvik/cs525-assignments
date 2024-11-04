@@ -9,6 +9,7 @@
 /* return code definitions */
 typedef int RC;
 
+
 #define RC_OK 0
 #define RC_FILE_NOT_FOUND 1
 #define RC_FILE_HANDLE_NOT_INIT 2
@@ -32,10 +33,13 @@ typedef int RC;
 #define RC_INVALID_BM 403
 #define RC_NON_EXISTING_PAGE_IN_FRAME 404
 
-#define RC_SCHEMA_NULL 500
-#define RC_INVALID_TABLE_NAME 501
-#define RC_CONDITION_NOT_FOUND 502
-#define RC_TUPLE_NOT_FOUND 503
+#define RC_PINNED_PAGES_IN_BUFFER 500
+#define RC_ERROR 400
+
+#define RC_SCAN_CONDITION_NOT_FOUND 600
+#define RC_RM_NO_TUPLE_WITH_GIVEN_RID 601
+
+
 
 /* holder for error messages */
 extern char *RC_message;

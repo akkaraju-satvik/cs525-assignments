@@ -13,13 +13,13 @@ typedef struct RM_ScanHandle
 } RM_ScanHandle;
 
 // table and manager
-extern RC initRecordManager (void *mgmtData); //DONE
-extern RC shutdownRecordManager ();  //DONE
-extern RC createTable (char *name, Schema *schema); //DONE
-extern RC openTable (RM_TableData *rel, char *name); //DONE
-extern RC closeTable (RM_TableData *rel); //DONE
-extern RC deleteTable (char *name); //DONE
-extern int getNumTuples (RM_TableData *rel); //DONE
+extern RC initRecordManager (void *mgmtData);
+extern RC shutdownRecordManager ();
+extern RC createTable (char *name, Schema *schema);
+extern RC openTable (RM_TableData *rel, char *name);
+extern RC closeTable (RM_TableData *rel);
+extern RC deleteTable (char *name);
+extern int getNumTuples (RM_TableData *rel);
 
 // handling records in a table
 extern RC insertRecord (RM_TableData *rel, Record *record);
@@ -33,13 +33,13 @@ extern RC next (RM_ScanHandle *scan, Record *record);
 extern RC closeScan (RM_ScanHandle *scan);
 
 // dealing with schemas
-extern int getRecordSize (Schema *schema); //DONE
-extern Schema *createSchema (int numAttr, char **attrNames, DataType *dataTypes, int *typeLength, int keySize, int *keys); //DONE
-extern RC freeSchema (Schema *schema); //DONE
+extern int getRecordSize (Schema *schema);
+extern Schema *createSchema (int numAttr, char **attrNames, DataType *dataTypes, int *typeLength, int keySize, int *keys);
+extern RC freeSchema (Schema *schema);
 
 // dealing with records and attribute values
 extern RC createRecord (Record **record, Schema *schema);
-extern RC freeRecord (Record *record); //DONE
+extern RC freeRecord (Record *record);
 extern RC getAttr (Record *record, Schema *schema, int attrNum, Value **value);
 extern RC setAttr (Record *record, Schema *schema, int attrNum, Value *value);
 
