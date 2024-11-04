@@ -9,34 +9,38 @@
 ## Contributions
 
 ### Manaswini Nagasamudram
-
-- initRecordMgr
-- shutdown
-- deleteTable
-- getNumTuples
-- startScan
-- closeScan
-- createtable
+- Implemented functions  in table and manager - initRecordMgr, shutdownRecordManager, createTable, deleteTable, getNumTables
+- initRecordManager intializes the record manager by assigning the memory for necessary attributes - buffer pool and page handle.
+- shutdownRecordManager - shut downs the record manager by releasing all assigned resources which includes buffer pool  and page handle.
+- createTable - creates a new table by initializing the metadata, ensures the file capacity and writes the metadata in the file to the first page. 
+- deleteTable - deletes the table by shutting down the buffer pool and destroys the corresponding file.
+- getNumTables - which returns the count of records stored in the table.
+- Implemented functions in scans - startScan, closeScan
+- startScan initializes the table scan by assigning the start page, slot and scan specified condition
+- closeScan closes the scan by resetting the scan manager page, slot and the record count
 
 ### Satvik Akkaraju
-
-- opentable
-- closetable
-- next
-- getRecordSize
-- createSchema
-- freeSchema
-- freeRecord
+- Implemented functions in table and manager - opentable, closetable
+- openTable initializes the buffer pool and loads the schema and metadata in the memory.
+- closeTable closes the table by getting the resources used in the buffer pool.
+- Implemented functions for scans - next, getRecordSize, createSchema, freeSchema, freeRecord
+- next function iterates over the records in the table by applying a scan condition and returns the next record which matches.
+- getRecordSize calculates the size of the single record in the table based on the schema attribute types.
+- createSchema creates a schema and initializes the schema structure with the specified attributes, data types and primary keys.
+- freeSchema releases the memory which is associated with the schema structure.
+- freeRecord frees the allocated memory for the particular record.
 
 ### Bindu Bhargavi Palam
+- Implemented record handling in the table - insert record, delete record, update record, get record
+- implemented insertRecord which manages the insertion by calculating the correct slot and after making the page as dirty advance the free slot pointer.
+- deleteRecord specifies the record as deleted by assigning the deletion marker
+- updateRecord overrides the existing data in the record's slot and marks the particular page as dirty as the page is modified.
+- getRecord - gets the record's data and verifies it the page is marked as deleted or not and returns if the slot is empty.
+- Implemented methods in dealing schemas as well - createRecord, getAttr, setAttr
+- createRecord - function to assign the memory for the new record based on the schema size given and it also initialize its data and fields.
+- getAttr - gets the attribute value from a record by calculating the offset based on the schema and its data type.
+- setAttr - assigns an attribute value in the record by specifing the correct offset and data type and copies the value into the record data.
 
-- insertRecord
-- deleteRecord
-- updateRecord
-- getRecord
-- createRecord
-- getAttr
-- setAttr
 
 ## Steps to execute the file
 
