@@ -52,10 +52,10 @@
 ## Steps to execute the file
 
 - Clone the repository
-- Change to "Assignment 3" directory
+- Change to "Assignment 4" directory
 
   ```bash
-  cd "Assignment 3"
+  cd "Assignment 4"
   ```
 
 - Clean the repository of any previous executables and files created from the program using Makefile target `clean`.
