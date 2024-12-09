@@ -39,32 +39,32 @@ typedef struct ScanManager {
     Node *node;
 } ScanManager;
 
-Node *findLeaf(Node *root, Value *key);
-NodeData *findRecord(Node *root, Value *key);
-void enqueue(BTreeManager *treeManager, Node *new_node);
-Node *dequeue(BTreeManager *treeManager);
-int path_to_root(Node *root, Node *child);
-NodeData *makeRecord(RID *rid);
-Node *insertIntoLeaf(BTreeManager *treeManager, Node *leaf, Value *key, NodeData *pointer);
-Node *createNewTree(BTreeManager *treeManager, Value *key, NodeData *pointer);
-Node *createNode(BTreeManager *treeManager);
-Node *createLeaf(BTreeManager *treeManager);
-Node *insertIntoLeafAfterSplitting(BTreeManager *treeManager, Node *leaf, Value *key, NodeData *pointer);
-Node *insertIntoNode(BTreeManager *treeManager, Node *parent, int left_index, Value *key, Node *right);
-Node *insertIntoNodeAfterSplitting(BTreeManager *treeManager, Node *parent, int left_index, Value *key, Node *right);
-Node *insertIntoParent(BTreeManager *treeManager, Node *left, Value *key, Node *right);
-Node *insertIntoNewRoot(BTreeManager *treeManager, Node *left, Value *key, Node *right);
-int getLeftIndex(Node *parent, Node *left);
-Node *adjustRoot(Node *root);
-Node *mergeNodes(BTreeManager *treeManager, Node *n, Node *neighbor, int neighbor_index, Value *k_prime);
-Node *redistributeNodes(Node *root, Node *n, Node *neighbor, int neighbor_index, int k_prime_index, Value *k_prime);
-Node *deleteEntry(BTreeManager *treeManager, Node *n, Value *key, void *pointer);
-Node *delete(BTreeManager *treeManager, Value *key);
-Node *removeEntryFromNode(BTreeManager *treeManager, Node *n, Value *key, Node *pointer);
-int getNeighborIndex(Node *n);
-bool isLess(Value *key1, Value *key2);
-bool isGreater(Value *key1, Value *key2);
-bool isEqual(Value *key1, Value *key2);
+Node *findLeaf_BTree(Node *root, Value *key);
+NodeData *findRecord_BTree(Node *root, Value *key);
+void enqueue_BTree(BTreeManager *treeManager, Node *new_node);
+Node *dequeue_BTree(BTreeManager *treeManager);
+int path_to_root_BTree(Node *root, Node *child);
+NodeData *makeRecord_BTree(RID *rid);
+Node *insertIntoLeaf_BTree(BTreeManager *treeManager, Node *leaf, Value *key, NodeData *pointer);
+Node *createNewTree_BTree(BTreeManager *treeManager, Value *key, NodeData *pointer);
+Node *createNode_BTree(BTreeManager *treeManager);
+Node *createLeaf_BTree(BTreeManager *treeManager);
+Node *insertIntoLeafAfterSplitting_BTree(BTreeManager *treeManager, Node *leaf, Value *key, NodeData *pointer);
+Node *insertIntoNode_BTree(BTreeManager *treeManager, Node *parent, int left_index, Value *key, Node *right);
+Node *insertIntoNodeAfterSplitting_BTree(BTreeManager *treeManager, Node *parent, int left_index, Value *key, Node *right);
+Node *insertIntoParent_BTree(BTreeManager *treeManager, Node *left, Value *key, Node *right);
+Node *insertIntoNewRoot_BTree(BTreeManager *treeManager, Node *left, Value *key, Node *right);
+int getLeftIndex_BTree(Node *parent, Node *left);
+Node *adjustRoot_BTree(Node *root);
+Node *mergeNodes_BTree(BTreeManager *treeManager, Node *n, Node *neighbor, int neighbor_index, Value *k_prime);
+Node *redistributeNodes_BTree(Node *root, Node *n, Node *neighbor, int neighbor_index, int k_prime_index, Value *k_prime);
+Node *deleteEntry_BTree(BTreeManager *treeManager, Node *n, Value *key, void *pointer);
+Node *delete_BTree(BTreeManager *treeManager, Value *key);
+Node *removeEntryFromNode_BTree(BTreeManager *treeManager, Node *n, Value *key, Node *pointer);
+int getNeighborIndex_BTree(Node *n);
+bool isLess_BTree(Value *key1, Value *key2);
+bool isGreater_BTree(Value *key1, Value *key2);
+bool isEqual_BTree(Value *key1, Value *key2);
 
 BTreeManager *treeManager = '\0';
 
@@ -147,11 +147,18 @@ RC openBtree(BTreeHandle **tree, char *idxId) {
 }
 
 RC closeBtree(BTreeHandle *tree) {
+    if(tree == NULL){
+        return RC_ERROR;
+    }
+    
     BTreeManager *treeManager = (BTreeManager*) tree->mgmtData;
-    markDirty(&treeManager->bufferPool, &treeManager->pageHandler);
-    shutdownBufferPool(&treeManager->bufferPool);
+    if(tree!=NULL){
+        markDirty(&(treeManager->bufferPool), &(treeManager->pageHandler));
+        shutdownBufferPool(&(treeManager->bufferPool));
+        free(treeManager);
+        
+    }
     free(tree);
-    free(treeManager);
     return RC_OK;
 }
 
@@ -162,6 +169,7 @@ RC deleteBtree(char *idxId) {
     return RC_OK;
 }
 
+
 RC insertKey(BTreeHandle *tree, Value *key, RID rid) {
       Node *leaf;
     NodeData *pointer;
@@ -169,38 +177,39 @@ RC insertKey(BTreeHandle *tree, Value *key, RID rid) {
     RC result ;
     int bTreeOrder = treeManager->order;
    
-    if (findRecord(treeManager->root, key)!= '\0') {
+    if (findRecord_BTree(treeManager->root, key)!= '\0') {
         return RC_IM_KEY_ALREADY_EXISTS;
     }
 
-    pointer = makeRecord(&rid);
+    pointer = makeRecord_BTree(&rid);
     
     if (treeManager->root == '\0') {
-        treeManager->root = createNewTree(treeManager, key, pointer);
+        treeManager->root = createNewTree_BTree(treeManager, key, pointer);
         result=RC_OK;
         return result;
     }
 
-    leaf = findLeaf(treeManager->root, key);
-    if (leaf->num_keys < bTreeOrder - 1) {
-        leaf = insertIntoLeaf(treeManager, leaf, key, pointer);
+    leaf = findLeaf_BTree(treeManager->root, key);
+    int leaf_num_keys = leaf->num_keys;
+    if ( leaf_num_keys < bTreeOrder - 1) {
+        leaf = insertIntoLeaf_BTree(treeManager, leaf, key, pointer);
     }
    
     else {
-        treeManager->root = insertIntoLeafAfterSplitting(treeManager, leaf, key, pointer);
+        treeManager->root = insertIntoLeafAfterSplitting_BTree(treeManager, leaf, key, pointer);
     }
     result=RC_OK;
     return result;
 }
 
-Node * createLeaf(BTreeManager * treeManager) {
-	Node * leaf = createNode(treeManager);
+Node * createLeaf_BTree(BTreeManager * treeManager) {
+	Node * leaf = createNode_BTree(treeManager);
 	leaf->is_leaf = true;
 	return leaf;
 }
 
 RC findKey(BTreeHandle *tree, Value *key, RID *result) {
-    NodeData *r = findRecord(treeManager->root, key);
+    NodeData *r = findRecord_BTree(treeManager->root, key);
     BTreeManager *treeManager = (BTreeManager *) tree->mgmtData;
     
     if (r == '\0') {
@@ -211,8 +220,8 @@ RC findKey(BTreeHandle *tree, Value *key, RID *result) {
     }
 }
 
-Node * insertIntoNewRoot(BTreeManager * treeManager, Node * left, Value * key, Node * right) {
-	Node * root = createNode(treeManager);
+Node * insertIntoNewRoot_BTree(BTreeManager * treeManager, Node * left, Value * key, Node * right) {
+	Node * root = createNode_BTree(treeManager);
    root->pointers[1] = right;
   	root->keys[0] = key;
   root->pointers[0] = left;
@@ -224,7 +233,7 @@ Node * insertIntoNewRoot(BTreeManager * treeManager, Node * left, Value * key, N
 	return root;
 }
 
-Node * insertIntoNode(BTreeManager * treeManager, Node * parent, int left_index, Value * key, Node * right) {
+Node * insertIntoNode_BTree(BTreeManager * treeManager, Node * parent, int left_index, Value * key, Node * right) {
     int i = parent->num_keys;
     while (i > left_index) {
         parent->keys[i] = parent->keys[i - 1];
@@ -240,7 +249,7 @@ Node * insertIntoNode(BTreeManager * treeManager, Node * parent, int left_index,
     return treeManager->root;
 }
 
-Node * insertIntoNodeAfterSplitting(BTreeManager * treeManager, Node * old_node, int left_index, Value * key, Node * right) {
+Node * insertIntoNodeAfterSplitting_BTree(BTreeManager * treeManager, Node * old_node, int left_index, Value * key, Node * right) {
 
      Value ** temp_keys;
     Node * new_node, *child;
@@ -288,7 +297,7 @@ Node * insertIntoNodeAfterSplitting(BTreeManager * treeManager, Node * old_node,
     else
         split = (bTreeOrder - 1) / 2;
 
-    new_node = createNode(treeManager);
+    new_node = createNode_BTree(treeManager);
     old_node->num_keys = 0;
     i = 0;
     while (i < split - 1) {
@@ -323,15 +332,15 @@ Node * insertIntoNodeAfterSplitting(BTreeManager * treeManager, Node * old_node,
     }
 
     treeManager->numEntries++;
-    return insertIntoParent(treeManager, old_node, k_prime, new_node);
+    return insertIntoParent_BTree(treeManager, old_node, k_prime, new_node);
 }
 
-Node * removeEntryFromNode(BTreeManager * treeManager, Node * n, Value * key, Node * pointer)  {
+Node * removeEntryFromNode_BTree(BTreeManager * treeManager, Node * n, Value * key, Node * pointer)  {
     int i=0, num_pointers;
     
    int bTreeOrder = treeManager->order;
    
-    for (; !isEqual(n->keys[i], key); i++) {}
+    for (; !isEqual_BTree(n->keys[i], key); i++) {}
     i=i+1;
     while (i < n->num_keys) {
         n->keys[i - 1] = n->keys[i];
@@ -367,7 +376,7 @@ Node * removeEntryFromNode(BTreeManager * treeManager, Node * n, Value * key, No
     return n;
 }
 
-Node * adjustRoot(Node * root) {
+Node * adjustRoot_BTree(Node * root) {
 
 	Node * new_root;
 	if (root->num_keys > 0)
@@ -387,7 +396,7 @@ Node * adjustRoot(Node * root) {
 	return new_root;
 }
 
-Node * createNode(BTreeManager * treeManager) {
+Node * createNode_BTree(BTreeManager * treeManager) {
     int bTreeOrder = treeManager->order;
 	treeManager->numNodes=treeManager->numNodes+1;
 
@@ -414,13 +423,13 @@ Node * createNode(BTreeManager * treeManager) {
 	return new_node;
 }
 
-int getLeftIndex(Node * parent, Node * left) {
+int getLeftIndex_BTree(Node * parent, Node * left) {
     int left_index = 0;
     for (; left_index <= parent->num_keys && parent->pointers[left_index] != left; left_index++) {}
     return left_index;
 }
 
-int getNeighborIndex(Node * n) {
+int getNeighborIndex_BTree(Node * n) {
     int i = 0;
     
     while (i <= n->parent->num_keys) {
@@ -431,7 +440,7 @@ int getNeighborIndex(Node * n) {
     exit(RC_ERROR);
 }
 
-Node * deleteEntry(BTreeManager * treeManager, Node * n, Value * key, void * pointer) {
+Node * deleteEntry_BTree(BTreeManager * treeManager, Node * n, Value * key, void * pointer) {
 	int min_keys;
 	Node * neighbor;
     int bTreeOrder = treeManager->order;
@@ -441,10 +450,10 @@ Node * deleteEntry(BTreeManager * treeManager, Node * n, Value * key, void * poi
     Value * k_prime;
 
 
-	n = removeEntryFromNode(treeManager, n, key, pointer);
+	n = removeEntryFromNode_BTree(treeManager, n, key, pointer);
     Node * r;
 	if (n == treeManager->root){
-		 r=adjustRoot(treeManager->root);
+		 r=adjustRoot_BTree(treeManager->root);
          return r;
     }
 	if (!n->is_leaf) {
@@ -462,7 +471,7 @@ Node * deleteEntry(BTreeManager * treeManager, Node * n, Value * key, void * poi
 	}
 	if (n->num_keys >= min_keys)
 		return treeManager->root;
-	neighbor_index = getNeighborIndex(n);
+	neighbor_index = getNeighborIndex_BTree(n);
     if(neighbor_index == -1 )
     {
         k_prime_index = 0;
@@ -491,12 +500,12 @@ Node * deleteEntry(BTreeManager * treeManager, Node * n, Value * key, void * poi
 
 	if (neighbor->num_keys + n->num_keys >= capacity)
 
-  	return redistributeNodes(treeManager->root, n, neighbor, neighbor_index, k_prime_index, k_prime);
+  	return redistributeNodes_BTree(treeManager->root, n, neighbor, neighbor_index, k_prime_index, k_prime);
 	else
-		return mergeNodes(treeManager, n, neighbor, neighbor_index, k_prime);
+		return mergeNodes_BTree(treeManager, n, neighbor, neighbor_index, k_prime);
 }
 
-Node * findLeaf(Node * root, Value * key) {
+Node * findLeaf_BTree(Node * root, Value * key) {
     Node * c = root;
     if (c == '\0') {
         return c;
@@ -505,7 +514,7 @@ Node * findLeaf(Node * root, Value * key) {
     for (; !c->is_leaf; ) {
         int i = 0;
         for (i = 0; i < c->num_keys; i++) {
-            if (!(isGreater(key, c->keys[i]) || isEqual(key, c->keys[i]))) {
+            if (!(isGreater_BTree(key, c->keys[i]) || isEqual_BTree(key, c->keys[i]))) {
                 break;
             }
         }
@@ -516,14 +525,14 @@ Node * findLeaf(Node * root, Value * key) {
     return c;
 }
 
-NodeData * findRecord(Node * root, Value *key) {
-    Node * c = findLeaf(root, key);
+NodeData * findRecord_BTree(Node * root, Value *key) {
+    Node * c = findLeaf_BTree(root, key);
     int i = 0;
   
     if (c == '\0')
         return NULL;
     while (i < c->num_keys) {
-        if (isEqual(c->keys[i], key))
+        if (isEqual_BTree(c->keys[i], key))
             break;
         i=i+1;
     }
@@ -535,21 +544,21 @@ NodeData * findRecord(Node * root, Value *key) {
         
 }
 
-Node * insertIntoParent(BTreeManager * treeManager, Node * left, Value * key, Node * right) {
+Node * insertIntoParent_BTree(BTreeManager * treeManager, Node * left, Value * key, Node * right) {
 	int left_index;
     int bTreeOrder = treeManager->order;
 	Node * parent = left->parent;
     
 
 	if (parent == '\0')
-		return insertIntoNewRoot(treeManager, left, key, right);
+		return insertIntoNewRoot_BTree(treeManager, left, key, right);
 
-	left_index = getLeftIndex(parent, left);
+	left_index = getLeftIndex_BTree(parent, left);
 	if (parent->num_keys >= bTreeOrder - 1) {
-    	return insertIntoNodeAfterSplitting(treeManager, parent, left_index, key, right);
+    	return insertIntoNodeAfterSplitting_BTree(treeManager, parent, left_index, key, right);
 	
 	}
-	return insertIntoNode(treeManager, parent, left_index, key, right);
+	return insertIntoNode_BTree(treeManager, parent, left_index, key, right);
 
 }
 
@@ -560,31 +569,36 @@ RC getNumEntries(BTreeHandle *tree, int *result) {
 }
 
 Node * delete(BTreeManager * treeManager, Value * key) {
-    NodeData * key_leaf = findLeaf(treeManager->root, key);
-	Node * record = findRecord(treeManager->root, key);
+    NodeData * key_leaf = findLeaf_BTree(treeManager->root, key);
+	Node * record = findRecord_BTree(treeManager->root, key);
 
 	if (record != NULL && key_leaf != NULL  ) {
-		treeManager->root = deleteEntry(treeManager, key_leaf, key, record);
+		treeManager->root = deleteEntry_BTree(treeManager, key_leaf, key, record);
 		free(record);
 	}
 	return treeManager->root;
 }
 
 RC getNumNodes(BTreeHandle *tree, int *result) {
-    BTreeManager *treeManager = (BTreeManager *) tree->mgmtData;
-    *result = treeManager->numNodes;
+    BTreeManager *treeManager ;
+    treeManager = (BTreeManager *) tree->mgmtData;
+    int result_nodes = treeManager->numNodes;
+    *result = result_nodes;
     return RC_OK;
 }
 
 RC getKeyType(BTreeHandle *tree, DataType *result) {
-    BTreeManager *treeManager = (BTreeManager *) tree->mgmtData;
+    BTreeManager *treeManager ;
+    treeManager = (BTreeManager *) tree->mgmtData;
     *result = treeManager->keyType;
     return RC_OK;
 }
 
 RC openTreeScan(BTreeHandle *tree, BT_ScanHandle **handle) {
-    BTreeManager *treeManager = (BTreeManager *) tree->mgmtData;
-    ScanManager *scanmeta = malloc(sizeof(ScanManager));
+    BTreeManager *treeManager;
+    treeManager = (BTreeManager *) tree->mgmtData;
+    ScanManager *scanmeta ;
+    scanmeta = malloc(sizeof(ScanManager));
     *handle = malloc(sizeof(BT_ScanHandle));
     Node *node = treeManager->root;
     if (treeManager->root !='\0') 
@@ -604,7 +618,8 @@ RC openTreeScan(BTreeHandle *tree, BT_ScanHandle **handle) {
 }
 
 RC deleteKey(BTreeHandle *tree, Value *key) {
-    BTreeManager *treeManager = (BTreeManager *) tree->mgmtData;
+    BTreeManager *treeManager; 
+    treeManager = (BTreeManager *) tree->mgmtData;
     treeManager->root = delete(treeManager, key);
     return RC_OK;
 }
@@ -661,11 +676,11 @@ char *printTree(BTreeHandle *tree) {
     }
     
     treeManager->queue = '\0';
-    enqueue(treeManager, treeManager->root);
+    enqueue_BTree(treeManager, treeManager->root);
     while (treeManager->queue != '\0') {
-        n = dequeue(treeManager);
+        n = dequeue_BTree(treeManager);
         if (n->parent != '\0' && n == n->parent->pointers[0]) {
-            new_rank = path_to_root(treeManager->root, n);
+            new_rank = path_to_root_BTree(treeManager->root, n);
             if (new_rank != rank) {
                 rank = new_rank;
             }
@@ -684,25 +699,23 @@ char *printTree(BTreeHandle *tree) {
             printf("(%d - %d) ", ((NodeData *) n->pointers[i])->rid.page, ((NodeData *) n->pointers[i])->rid.slot);
         }
         
-        if (!n->is_leaf)
+        if (!n->is_leaf){
             for (i = 0; i <= n->num_keys; i++)
-                enqueue(treeManager, n->pointers[i]);
+            {
+                if(n->pointers!=NULL){
+                    enqueue_BTree(treeManager, n->pointers[i]);
+                }
+                
+            }
+                
+        }
+            
     }
     return NULL;
 }
 
-/*NodeData *makeRecord(RID *rid) {
-    NodeData *record = (NodeData *) malloc(sizeof(NodeData));
-    if (record == '\0') {
-        exit(RC_INSERT_ERROR);
-    } else {
-        record->rid.page = rid->page;
-        record->rid.slot = rid->slot;
-    }
-    return record;
-}*/
 
-NodeData *makeRecord(RID *rid) {
+NodeData *makeRecord_BTree(RID *rid) {
     if (rid == NULL) {
         return NULL;
     }
@@ -716,8 +729,8 @@ NodeData *makeRecord(RID *rid) {
     return record;
 }
 
-Node *createNewTree(BTreeManager *treeManager, Value *key, NodeData *pointer) {
-    Node *root = createLeaf(treeManager);
+Node *createNewTree_BTree(BTreeManager *treeManager, Value *key, NodeData *pointer) {
+    Node *root = createLeaf_BTree(treeManager);
     int bTreeOrder = treeManager->order;
     root->pointers[0] = pointer;
     root->pointers[bTreeOrder - 1] = NULL;
@@ -728,12 +741,12 @@ Node *createNewTree(BTreeManager *treeManager, Value *key, NodeData *pointer) {
     return root;
 }
 
-Node *insertIntoLeaf(BTreeManager *treeManager, Node *leaf, Value *key, NodeData *pointer) {
+Node *insertIntoLeaf_BTree(BTreeManager *treeManager, Node *leaf, Value *key, NodeData *pointer) {
     int i, insertion_point;
      insertion_point = 0;
     treeManager->numEntries=treeManager->numEntries+1;
    
-    while (insertion_point < leaf->num_keys && isLess(leaf->keys[insertion_point], key))
+    while (insertion_point < leaf->num_keys && isLess_BTree(leaf->keys[insertion_point], key))
         insertion_point=insertion_point+1;
     for (i = leaf->num_keys; i > insertion_point; i--) {
          
@@ -750,14 +763,14 @@ Node *insertIntoLeaf(BTreeManager *treeManager, Node *leaf, Value *key, NodeData
     return leaf;
 }
 
-Node *insertIntoLeafAfterSplitting(BTreeManager *treeManager, Node *leaf, Value *key, NodeData *pointer) {
+Node *insertIntoLeafAfterSplitting_BTree(BTreeManager *treeManager, Node *leaf, Value *key, NodeData *pointer) {
     Node *new_leaf;
     Value **temp_keys;
     void **temp_pointers;
     int insertion_index, split, i, j;
     Value *new_key;
 
-    new_leaf = createLeaf(treeManager);
+    new_leaf = createLeaf_BTree(treeManager);
     int bTreeOrder = treeManager->order;
 
     temp_keys = malloc(bTreeOrder * sizeof(Value *));
@@ -771,7 +784,7 @@ Node *insertIntoLeafAfterSplitting(BTreeManager *treeManager, Node *leaf, Value 
     }
 
     insertion_index = 0;
-    for (; insertion_index < bTreeOrder - 1 && isLess(leaf->keys[insertion_index], key); insertion_index++) {}
+    for (; insertion_index < bTreeOrder - 1 && isLess_BTree(leaf->keys[insertion_index], key); insertion_index++) {}
 
     i = 0;
     j = 0;
@@ -837,10 +850,10 @@ Node *insertIntoLeafAfterSplitting(BTreeManager *treeManager, Node *leaf, Value 
 
     treeManager->numEntries++;
 
-    return insertIntoParent(treeManager, leaf, new_key, new_leaf);
+    return insertIntoParent_BTree(treeManager, leaf, new_key, new_leaf);
 }
 
-Node *mergeNodes(BTreeManager *treeManager, Node *n, Node *neighbor, int neighbor_index, Value *k_prime) {
+Node *mergeNodes_BTree(BTreeManager *treeManager, Node *n, Node *neighbor, int neighbor_index, Value *k_prime) {
     int i, j, neighbor_insertion_index, n_end;
     int bTreeOrder = treeManager->order;
     Node *tmp;
@@ -892,14 +905,14 @@ Node *mergeNodes(BTreeManager *treeManager, Node *n, Node *neighbor, int neighbo
         neighbor->pointers[bTreeOrder - 1] = n->pointers[bTreeOrder - 1];
     }
 
-    treeManager->root = deleteEntry(treeManager, n->parent, k_prime, n);
+    treeManager->root = deleteEntry_BTree(treeManager, n->parent, k_prime, n);
     free(n->keys);
     free(n->pointers);
     free(n);
     return treeManager->root;
 }
 
-Node *redistributeNodes(Node *root, Node *n, Node *neighbor, int neighbor_index, int k_prime_index, Value *k_prime) {
+Node *redistributeNodes_BTree(Node *root, Node *n, Node *neighbor, int neighbor_index, int k_prime_index, Value *k_prime) {
     int i;
     Node *tmp;
 
@@ -952,7 +965,7 @@ Node *redistributeNodes(Node *root, Node *n, Node *neighbor, int neighbor_index,
     return root;
 }
 
-void enqueue(BTreeManager *treeManager, Node *new_node) {
+void enqueue_BTree(BTreeManager *treeManager, Node *new_node) {
     Node *c;
     if (treeManager->queue == NULL) {
         treeManager->queue = new_node;
@@ -967,14 +980,14 @@ void enqueue(BTreeManager *treeManager, Node *new_node) {
     }
 }
 
-Node *dequeue(BTreeManager *treeManager) {
+Node *dequeue_BTree(BTreeManager *treeManager) {
     Node *n = treeManager->queue;
     treeManager->queue = treeManager->queue->next;
     n->next = NULL;
     return n;
 }
 
-int path_to_root(Node *root, Node *child) {
+int path_to_root_BTree(Node *root, Node *child) {
     int length = 0;
     Node *c = child;
     for (; c != root; c = c->parent) {
@@ -983,7 +996,7 @@ int path_to_root(Node *root, Node *child) {
     return length;
 }
 
-bool isLess(Value *key1, Value *key2) {
+bool isLess_BTree(Value *key1, Value *key2) {
     if (key1->dt == DT_INT) {
         return (key1->v.intV < key2->v.intV);
     } else if (key1->dt == DT_FLOAT) {
@@ -997,7 +1010,7 @@ bool isLess(Value *key1, Value *key2) {
     }
 }
 
-bool isGreater(Value *key1, Value *key2) {
+bool isGreater_BTree(Value *key1, Value *key2) {
     if (key1->dt == DT_INT) {
         return (key1->v.intV > key2->v.intV);
     } else if (key1->dt == DT_FLOAT) {
@@ -1011,7 +1024,7 @@ bool isGreater(Value *key1, Value *key2) {
     }
 }
 
-bool isEqual(Value *key1, Value *key2) {
+bool isEqual_BTree(Value *key1, Value *key2) {
     if (key1->dt == DT_INT) {
         return (key1->v.intV == key2->v.intV);
     } else if (key1->dt == DT_FLOAT) {
